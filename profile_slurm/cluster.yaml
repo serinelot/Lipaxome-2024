@@ -1,0 +1,53 @@
+__default__:
+    job-name: "SM.{rule}"
+    nodes: 1
+    cpus-per-task: 2
+    mem: 4G
+    time: 0-0:30:00
+    mail-user: "bens3307@usherbrooke.ca"
+    mail-type: FAIL
+
+trimming:
+    cpus-per-task: 4
+    mem: 1G
+    time: 0-1:30:00
+
+qc:
+    cpus-per-task: 4
+    mem: 1G
+    time: 0-0:45:00
+
+qc_after_trim:
+    cpus-per-task: 4
+    mem: 1G
+    time: 0-0:45:00
+
+star_index:
+    cpus-per-task: 32
+    mem: 128G
+    time: 0-6:00:00
+
+star_align:
+    cpus-per-task: 32
+    mem: 128G
+    time: 0-3:00:00
+
+coco_ca:
+    cpus-per-task: 1
+    mem: 8G
+    time: 0-2:00:00
+
+coco_cc:
+    cpus-per-task: 32
+    mem: 128G
+    time: 0-12:00:00
+
+coco_cb:
+    cpus-per-task: 32
+    mem: 128G
+    time: 0-7:00:00
+
+sort_bg:
+    cpus-per-task: 1
+    mem: 64G
+    time: 0-2:00:00

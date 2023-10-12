@@ -1,0 +1,13 @@
+{
+  "path": {
+    "fastq": "data/references/fastq/",
+    "reference_genome": "data/references/human_genome_ensembl_87.fa",
+    "standard_annotation": "data/references/human_ensembl_87_wo_dup_v2.BB_v3.gtf",
+    "reference_annotation": "data/references/human_ensembl_87_wo_dup_v2.BB_v3.correct_annotation.gtf",
+    "reference_intron_annotation": "data/references/human_ensembl_87_wo_dup_v2.BB_v3.correct_annotation.introns.gtf",
+    "coco_git_link": "https://github.com/scottgroup/coco.git"
+  },
+  "download": {
+    "human_gtf": "http://ftp.ensembl.org/pub/release-110/gtf/homo_sapiens/Homo_sapiens.GRCh38.110.gtf.gz"
+  }
+}

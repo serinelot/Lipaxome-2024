@@ -1,0 +1,27 @@
+import os
+from pathlib import Path
+
+configfile: "../config/config.json"
+
+with open("SRR_id.txt") as f:
+    id_list = f.read().splitlines()
+
+include: "rules/download_all.smk"
+include: "rules/common_seq.smk"
+
+rule all:
+    input:
+        qc_fq1_out = expand("data/qc/{id}_1_fastqc.html", id = id_list),
+        qc_fq2_out = expand("data/qc/{id}_2_fastqc.html", id = id_list),
+        
+        trimm_unpaired_fq1 = expand("data/trimmed/{id}_1.unpaired.fastq.gz", id = id_list),
+        trimm_unpaired_fq2 = expand("data/trimmed/{id}_2.unpaired.fastq.gz", id = id_list),
+
+        qc_trimm_fq1_out = expand("data/qc_trimmed/{id}_1_fastqc.html", id = id_list),
+        qc_trimm_fq2_out = expand("data/qc_trimmed/{id}_2_fastqc.html", id = id_list)
+
+#rule all_downloads:
+#    input:
+#        #gtfs = expand('data/references/gtf/homo_sapiens.gtf', **config),
+#        genome = expand('data/references/genome_fa/homo_sapiens_genome.fa'),
+#        fake_output_fastq = expand('data/references/geo_download.txt')
