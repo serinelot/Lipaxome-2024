@@ -13,24 +13,24 @@ trimming:
     time: 0-1:30:00
 
 qc:
-    cpus-per-task: 4
-    mem: 1G
+    cpus-per-task: 6
+    mem: 2G
     time: 0-0:45:00
 
-qc_after_trim:
-    cpus-per-task: 4
-    mem: 1G
+qc_trimm:
+    cpus-per-task: 6
+    mem: 2G
     time: 0-0:45:00
 
 star_index:
     cpus-per-task: 32
-    mem: 128G
-    time: 0-6:00:00
+    mem: 70G
+    time: 0-1:30:00
 
-star_align:
+star_alignReads:
     cpus-per-task: 32
-    mem: 128G
-    time: 0-3:00:00
+    mem: 130G
+    time: 0-2:00:00
 
 coco_ca:
     cpus-per-task: 1

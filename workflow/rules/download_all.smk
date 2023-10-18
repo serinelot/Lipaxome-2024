@@ -7,7 +7,9 @@ rule download_human_gtf:
     params:
         link = config['download']['human_gtf']
     shell:
-        "wget -O {output.gtf} {params.link}"
+        "wget -O temp.gz {params.link} && "
+        "gunzip temp.gz && "
+        "mv temp {output.gtf}"
 
 
 

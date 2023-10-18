@@ -34,7 +34,7 @@ rule trimming:
     """ Trims the FASTQ files using Trimmomatic """
     input:
         fq1 = "data/fastq/{id}_1.fastq.gz",
-        fq2 = "data/fastq/{id}_1.fastq.gz"
+        fq2 = "data/fastq/{id}_2.fastq.gz"
 
     output:
         trimm_fq1 = "data/trimmed/{id}_1.fastq.gz",
@@ -101,3 +101,70 @@ rule qc_trimm:
         "{input.trimm_fq1} {input.trimm_fq2} "
         "{input.trimm_unpaired_fq1} {input.trimm_unpaired_fq2} "
         "&> {log}" 
+
+
+
+rule star_index:
+    """ Generates the genome index for STAR """
+    input:
+        fasta = 'data/references/genome_fa/homo_sapiens_genome.fa',
+        gtf = 'data/references/gtf/homo_sapiens.gtf'
+    output:
+        chrNameLength = config['path']['chrNameLength']
+    params:
+        dir = config['path']['star_index']
+    log:
+        "logs/STAR/index.log"
+    conda:
+        "../envs/star.yml"
+    threads:
+        32
+    shell:
+        "mkdir -p {params.dir} && "
+        "STAR --runThreadN {threads} "
+        "--runMode genomeGenerate "
+        "--genomeDir {params.dir} "
+        "--genomeFastaFiles {input.fasta} "
+        "--sjdbGTFfile {input.gtf} "
+        "--sjdbOverhang 99"
+        "&> {log}"
+
+
+
+rule star_alignReads:
+    """ Generates a bam file using STAR """
+    input:
+        idx = rules.star_index.output,
+        fq1 = rules.trimming.output.trimm_fq1,
+        fq2 = rules.trimming.output.trimm_fq2
+    output:
+        bam = "results/STAR/{id}/Aligned.sortedByCoord.out.bam",
+        bam_logs = "results/STAR/{id}/Log.final.out"
+    params:
+        index = config['path']['star_index'],
+        output_dir = "results/STAR/{id}/"
+    log:
+        "logs/STAR/{id}.log"
+    threads:
+        32
+    conda:
+        "../envs/star.yml"
+    shell:
+        "STAR --runMode alignReads "
+        "--genomeDir {params.index} "
+        "--readFilesIn {input.fq1} {input.fq2}  "
+        "--runThreadN {threads} "
+        "--readFilesCommand zcat "
+        "--outReadsUnmapped Fastx "
+        "--outFilterType BySJout "
+        "--outStd Log "
+        "--outSAMunmapped None "
+        "--outSAMtype BAM SortedByCoordinate "
+        "--outFileNamePrefix {params.output_dir} "
+        "--outFilterScoreMinOverLread 0.3 "
+        "--outFilterMatchNminOverLread 0.3 "
+        "--outFilterMultimapNmax 100 "
+        "--winAnchorMultimapNmax 100 "
+        "--limitBAMsortRAM 600000000000"
+        "--alignEndsProtrude 5 ConcordantPair "
+        "&> {log}"
