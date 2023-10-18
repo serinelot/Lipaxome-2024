@@ -32,6 +32,11 @@ star_alignReads:
     mem: 130G
     time: 0-2:00:00
 
+feature_counts:
+    cpus-per-task: 4
+    mem: 12G
+    time: 0-2:00:00
+
 coco_ca:
     cpus-per-task: 1
     mem: 8G

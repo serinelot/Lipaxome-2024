@@ -3,11 +3,12 @@ from pathlib import Path
 
 configfile: "../config/config.json"
 
-include: "rules/common_seq.smk"
-include: "rules/download_all.smk"
-
 with open("SRR_id.txt") as f:
     id_list = f.read().splitlines()
+
+include: "rules/download_all.smk"
+include: "rules/common_seq.smk"
+include: "rules/dge_analysis.smk"
 
 rule all:
     input:
@@ -24,3 +25,7 @@ rule all_downloads:
         gtf = expand('data/references/gtf/homo_sapiens.gtf', **config),
         genome = expand('data/references/genome_fa/homo_sapiens_genome.fa'),
         fake_output_fastq = expand('data/references/geo_download.txt')
+
+rule dge:
+    input:
+        counts = expand("results/featureCounts/{id}_gene_counts.tsv", id = id_list)
