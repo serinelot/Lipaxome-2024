@@ -9,6 +9,7 @@ with open("SRR_id.txt") as f:
 include: "rules/download_all.smk"
 include: "rules/common_seq.smk"
 include: "rules/dge_analysis.smk"
+include: "rules/tgirt_seq.smk"
 
 rule all:
     input:
@@ -24,8 +25,19 @@ rule all_downloads:
     input:
         gtf = expand('data/references/gtf/homo_sapiens.gtf', **config),
         genome = expand('data/references/genome_fa/homo_sapiens_genome.fa'),
-        fake_output_fastq = expand('data/references/geo_download.txt')
+        fake_output_fastq = expand('data/references/geo_download.txt'),
+        coco_dependency_download = "scripts/pairedBamToBed12/",
+        coco_git = 'git_repos/coco'
 
 rule dge:
     input:
-        counts = expand("results/featureCounts/{id}_gene_counts.tsv", id = id_list)
+        counts = expand("results/dge/featureCounts/{id}_gene_counts.tsv", id = id_list)
+
+rule tgirt:
+    input:
+        gtf_corrected = "data/references/gtf/correct_annotation.gtf",
+        coco_cc = expand("results/tgirt/coco_cc/{id}.tsv", id = id_list),
+        merged_counts = "results/tgirt/coco_cc/merged_counts.tsv",
+        unsorted_bedgraph = expand("results/tgirt/coco_cb/{id}_unsorted.bedgraph", id = id_list),
+        sorted_bedgraph = expand("results/tgirt/coco_cb/{id}.bedgraph", id = id_list)
+

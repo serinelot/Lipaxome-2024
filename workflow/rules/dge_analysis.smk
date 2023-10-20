@@ -3,7 +3,7 @@ rule feature_counts:
         bam = rules.star_alignReads.output.bam, 
         gtf = 'data/references/gtf/homo_sapiens.gtf'
     output:
-        counts = "results/featureCounts/{id}_gene_counts.tsv"
+        counts = "results/dge/featureCounts/{id}_gene_counts.tsv"
     log:
         "logs/featureCounts/{id}.log"
     threads:

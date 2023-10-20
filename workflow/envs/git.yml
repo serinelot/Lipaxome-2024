@@ -1,0 +1,4 @@
+channels:
+  - bioconda
+dependencies:
+  - git =2.20.1

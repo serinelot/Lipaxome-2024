@@ -1,0 +1,10 @@
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - subread =2.0.0
+  - bedtools =2.29.2
+  - samtools =1.10
+  - pandas =0.24.2
+  - numpy =1.17.2 

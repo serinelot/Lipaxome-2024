@@ -42,3 +42,33 @@ rule download_human_sample_fastq:
         "wget -i ../references/sra_id_wget.txt && "
         "cd ../references/ && "
         "touch geo_download.txt"
+
+
+
+rule install_pairedBamToBed12:
+    output:
+        directory("scripts/pairedBamToBed12/")
+    params:
+        pairedBamToBed12_bin = 'scripts/pairedBamToBed12/bin'
+    conda:
+        "../envs/coco.yml"
+    shell:
+        'mkdir -p scripts && cd scripts && pwd && '
+        'git clone https://github.com/Population-Transcriptomics/pairedBamToBed12 && '
+        'cd pairedBamToBed12 && '
+        'make '
+
+
+
+
+rule download_coco_git:
+    """Download git repository of CoCo."""
+    output:
+        git_coco_folder = directory('git_repos/coco')
+    params:
+        git_coco_link = config['path']['coco_git_link']
+    conda:
+        '../envs/git.yml'
+    shell:
+        'mkdir -p {output.git_coco_folder} '
+        '&& git clone {params.git_coco_link} {output.git_coco_folder}'
