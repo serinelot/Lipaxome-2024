@@ -32,11 +32,6 @@ star_alignReads:
     mem: 130G
     time: 0-2:00:00
 
-feature_counts:
-    cpus-per-task: 4
-    mem: 12G
-    time: 0-2:00:00
-
 coco_ca:
     cpus-per-task: 1
     mem: 8G
@@ -61,3 +56,33 @@ sort_bg:
     cpus-per-task: 1
     mem: 64G
     time: 0-2:00:00
+
+build_transcriptome:
+    cpus-per-task: 2
+    mem: 8G
+    time: 0-1:00:00
+
+kallisto_index:
+    cpus-per-task: 16
+    mem: 20G
+    time: 0-0:30:00
+
+kallisto_quant:
+    cpus-per-task: 32
+    mem: 60G
+    time: 0-2:00:00
+
+tx2gene:
+    cpus-per-task: 2
+    mem: 2G
+    time: 0-0:30:00
+
+filter_gtf_pc_genes:
+    cpus-per-task: 2
+    mem: 2G
+    time: 0-0:30:00
+
+merge_kallisto_quant:
+    cpus-per-task: 4
+    mem: 1G
+    time: 0-1:00:00
