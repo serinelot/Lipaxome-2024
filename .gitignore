@@ -5,12 +5,15 @@ workflow/data/qc/
 workflow/data/trimmed/
 workflow/data/qc_trimmed/
 workflow/data/fastq/
+workflow/data/comparisons.tsv
+workflow/data/design.tsv
 workflow/data/references/Homo_sapiens_GRCh38_110.protein_coding.gtf
 workflow/data/references/kallisto.idx
 workflow/data/references/transcriptome.fa
 workflow/data/references/tx2gene.tsv
 workflow/data/references/genome_fa/
 workflow/data/references/gtf/
+workflow/data/references/gff3/
 workflow/data/references/geo_download.txt
 workflow/data/references/star_index/
 workflow/data/star_index/

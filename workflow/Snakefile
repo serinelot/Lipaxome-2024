@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import pandas as pd
 
 configfile: "../config/config.json"
 
@@ -9,6 +10,7 @@ with open("SRR_id.txt") as f:
 include: "rules/download_all.smk"
 include: "rules/common_seq.smk"
 include: "rules/dge_analysis.smk"
+include: "rules/splicing.smk"
 include: "rules/tgirt_seq.smk"
 
 rule all:
@@ -24,6 +26,7 @@ rule all:
 rule all_downloads:
     input:
         gtf = expand('data/references/gtf/homo_sapiens.gtf', **config),
+        gff3 = expand('data/references/gff3/homo_sapiens.gff3', **config),
         genome = expand('data/references/genome_fa/homo_sapiens_genome.fa'),
         fake_output_fastq = expand('data/references/geo_download.txt'),
         coco_dependency_download = "scripts/pairedBamToBed12/",
@@ -37,6 +40,12 @@ rule dge:
         tx2gene = "data/references/tx2gene.tsv",
         pc_gtf = "data/references/Homo_sapiens_GRCh38_110.protein_coding.gtf",
         tpm = "results/dge/kallisto/tpm.tsv"
+
+rule splicing:
+    input:
+        primary_alignments = expand("results/splicing/star/{id}/{id}_Aligned.sortedByCoord.out.primary.bam", id = id_list),
+        bam_index = expand("results/splicing/star/{id}/{id}_Aligned.sortedByCoord.out.primary.bam.bai", id = id_list),
+        genomecov = expand("results/splicing/genomecov/{id}.bedgraph", id = id_list)
 
 rule tgirt:
     input:

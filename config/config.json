@@ -11,6 +11,7 @@
     "coco_git_link": "https://github.com/scottgroup/coco.git"
   },
   "download": {
-    "human_gtf": "http://ftp.ensembl.org/pub/release-110/gtf/homo_sapiens/Homo_sapiens.GRCh38.110.gtf.gz"
+    "human_gtf": "http://ftp.ensembl.org/pub/release-110/gtf/homo_sapiens/Homo_sapiens.GRCh38.110.gtf.gz",
+    "human_gff3": "http://ftp.ensembl.org/pub/current_gff3/homo_sapiens/Homo_sapiens.GRCh38.110.gff3.gz"
   }
 }
