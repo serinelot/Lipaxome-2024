@@ -10,8 +10,7 @@ with open("SRR_id.txt") as f:
 include: "rules/download_all.smk"
 include: "rules/common_seq.smk"
 include: "rules/dge_analysis.smk"
-include: "rules/splicing.smk"
-include: "rules/tgirt_seq.smk"
+
 
 rule all:
     input:
@@ -23,14 +22,13 @@ rule all:
         bam = expand("results/STAR/{id}/Aligned.sortedByCoord.out.bam", id = id_list),
         bam_logs = expand("results/STAR/{id}/Log.final.out", id = id_list)
 
+
 rule all_downloads:
     input:
-        gtf = expand('data/references/gtf/homo_sapiens.gtf', **config),
-        gff3 = expand('data/references/gff3/homo_sapiens.gff3', **config),
-        genome = expand('data/references/genome_fa/homo_sapiens_genome.fa'),
-        fake_output_fastq = expand('data/references/geo_download.txt'),
+#        fake_output_fastq = expand('data/references/geo_download.txt'),
         coco_dependency_download = "scripts/pairedBamToBed12/",
         coco_git = 'git_repos/coco'
+
 
 rule dge:
     input:
@@ -38,20 +36,6 @@ rule dge:
         kallisto_index = "data/references/kallisto.idx",
         kallisto_quant = expand("results/dge/kallisto/{id}/abundance.tsv", id = id_list),
         tx2gene = "data/references/tx2gene.tsv",
-        pc_gtf = "data/references/Homo_sapiens_GRCh38_110.protein_coding.gtf",
-        tpm = "results/dge/kallisto/tpm.tsv"
-
-rule splicing:
-    input:
-        primary_alignments = expand("results/splicing/star/{id}/{id}_Aligned.sortedByCoord.out.primary.bam", id = id_list),
-        bam_index = expand("results/splicing/star/{id}/{id}_Aligned.sortedByCoord.out.primary.bam.bai", id = id_list),
-        genomecov = expand("results/splicing/genomecov/{id}.bedgraph", id = id_list)
-
-rule tgirt:
-    input:
-        gtf_corrected = "data/references/gtf/correct_annotation.gtf",
-        coco_cc = expand("results/tgirt/coco_cc/{id}.tsv", id = id_list),
-        merged_counts = "results/tgirt/coco_cc/merged_counts.tsv",
-        unsorted_bedgraph = expand("results/tgirt/coco_cb/{id}_unsorted.bedgraph", id = id_list),
-        sorted_bedgraph = expand("results/tgirt/coco_cb/{id}.bedgraph", id = id_list)
-
+        pc_gtf = "data/references/gtf/hg38_Ensembl_V101_Scottlab_2020.protein_coding.gtf",
+        tpm = "results/dge/kallisto/tpm.tsv",
+        deseq2 = "results/dge/deseq2/FXS-Control.csv"

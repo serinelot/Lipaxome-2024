@@ -16,34 +16,33 @@ comparison_file <- snakemake@input[["comparisons"]]
 transcript_gene_file <- snakemake@input[["gene_id"]]
 
 # create the directory that will contain the results
-dir.create(output_dir, showWarnings=FALSE)
+dir.create(output_dir, showWarnings = FALSE)
 
 #############################################################
 #------------- Importing data and information ---------------
 #############################################################
 # Loading samples information from the design file.
 sampleTable <- read.table(
-    design_file, header=TRUE,
-    row.names="sample", check.names=FALSE
+    design_file, header = TRUE,
+    row.names = "sample", check.names = FALSE
 )
 conditions <- unique(sampleTable$condition)
 samples <- rownames(sampleTable)
-sampleTable$condition <- factor(sampleTable$condition, levels=conditions)
+sampleTable$condition <- factor(sampleTable$condition, levels = conditions)
 
 # Loading the comparisons
 comparisons <- read.table(
-    comparison_file, header=TRUE
+    comparison_file, header = TRUE
 )
 
 # Read the transcript-gene matrix
-tx2gene <- read_tsv(transcript_gene_file, col_names=c('TXNAME', 'GENEID'))
+tx2gene <- read_tsv(transcript_gene_file, col_names = c('TXNAME', 'GENEID'))
 
 # Get the h5 files for all conditions
 files <- file.path(kallisto_dir, samples, "abundance.h5")
 names(files) <- samples
-txi.kallisto <- tximport(files, type="kallisto", tx2gene=tx2gene) # for gene differential analysis
-# txi.kallisto <- tximport(files, type="kallisto", txOut=TRUE) # for transcript differential analysis
-
+txi.kallisto <- tximport(files, type = "kallisto", tx2gene = tx2gene) # for gene differential analysis
+# txi.kallisto <- tximport(files, type = "kallisto", txOut = TRUE) # for transcript differential analysis
 
 #############################################################
 #--------------- Creating the DESeq2 object -----------------
@@ -65,14 +64,13 @@ dds$condition <- factor(dds$condition, conditions)
 # call the function for differential gene expression analysis
 dds <- DESeq(dds)
 
-
 #############################################################
 #-------------- Looping over all comparisons ----------------
 #############################################################
 for (row in 1:nrow(comparisons)) {
 
     condition1 <- comparisons[row, "cdn1"]
-    condition2  <- comparisons[row, "cdn2"]
+    condition2 <- comparisons[row, "cdn2"]
     exp <- sprintf("%s-%s", condition1, condition2)
 
     res <- results(
@@ -88,16 +86,19 @@ for (row in 1:nrow(comparisons)) {
     # transform the result to data frame
     res_df <- as.data.frame(res)
 
-    # Writing results to file
-    fname <- paste(
+    # Specify the output filename directly
+    output_filename <- paste(
         output_dir,
-        paste(exp, "csv", sep='.'),
-        sep='/'
+        "FXS-Control.csv",  # Output filename
+        sep = '/'
     )
 
+    # Write results to the output file
     write.csv(
         res_df,
-        file=fname,
-        quote=FALSE,
+        file = output_filename,  # Use the specified filename
+        quote = FALSE,
     )
+    cat("Results written to:", output_filename, "\n")  # Print the output file path
 }
+

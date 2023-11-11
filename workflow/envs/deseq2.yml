@@ -1,0 +1,14 @@
+channels:
+  - conda-forge
+  - bioconda
+  - r
+
+dependencies:
+  - r-base>=3.5
+  - bioconductor-deseq2>=1.10
+  - bioconductor-tximportdata>=1.10
+  - bioconductor-tximport>=1.8
+  - bioconductor-rhdf5>=2.12
+  - r-readr>=1.0
+  - r-tidyverse>=1.0
+

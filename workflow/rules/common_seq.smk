@@ -107,8 +107,8 @@ rule qc_trimm:
 rule star_index:
     """ Generates the genome index for STAR """
     input:
-        fasta = 'data/references/genome_fa/homo_sapiens_genome.fa',
-        gtf = 'data/references/gtf/homo_sapiens.gtf'
+        fasta = config['path']['human_genome_fa'],
+        gtf = config['path']['human_gtf']
     output:
         chrNameLength = config['path']['chrNameLength']
     params:

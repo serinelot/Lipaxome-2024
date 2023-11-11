@@ -1,7 +1,7 @@
 rule build_transcriptome:
     input:
-        genome = rules.download_human_genome.output.genome,
-        gtf = rules.download_human_gtf.output.gtf    
+        genome = config["path"]["human_genome_fa"],
+        gtf = config["path"]["human_gtf"]    
     output:
         config["path"]["transcriptome"]
     conda:
@@ -69,7 +69,7 @@ rule kallisto_quant:
 
 rule tx2gene:
     input:
-        gtf = 'data/references/gtf/homo_sapiens.gtf'
+        gtf = config["path"]["human_gtf"]
     output:
         tsv = "data/references/tx2gene.tsv"
     conda:
@@ -83,9 +83,9 @@ rule tx2gene:
 
 rule filter_gtf_pc_genes:
     input:
-        gtf = 'data/references/gtf/homo_sapiens.gtf'
+        gtf = config["path"]["human_gtf"]
     output:
-        pc_gtf = "data/references/Homo_sapiens_GRCh38_110.protein_coding.gtf"
+        pc_gtf = "data/references/gtf/hg38_Ensembl_V101_Scottlab_2020.protein_coding.gtf"
     log:
         "logs/kallisto/filter_gtf_pc_genes.log"
     message:
@@ -106,7 +106,43 @@ rule merge_kallisto_quant:
         "../envs/python.yml"
     log:
         "logs/kallisto/merge_kallisto_quant.log"
-    message: 
+    message:
         "Merge kallisto quantification results into one dataframe for further analysis."
     script:
         "../scripts/merge_kallisto_quant.py"
+
+
+
+
+rule extract_cdn_values:
+    output:
+        cdn1_file = "data/cdn1.txt",
+        cdn2_file = "data/cdn2.txt"
+    run:
+        with open("data/comparisons.tsv") as f, open(output.cdn1_file, 'w') as f1, open(output.cdn2_file, 'w') as f2:
+            lines = f.read().strip().split('\n')
+            cdn1 = lines[1].split()[0]  # Assuming the first line contains column names
+            cdn2 = lines[1].split()[1]
+            f1.write(cdn1)
+            f2.write(cdn2)
+
+
+
+
+rule deseq2:
+    input:
+        quant = expand("results/dge/kallisto/{id}/abundance.tsv", id = id_list),
+        samples = "data/design.tsv",
+        comparisons = "data/comparisons.tsv",
+        gene_id = "data/references/tx2gene.tsv"
+    output:
+        results = directory("results/dge/deseq2"),
+        deseq2_output = "results/dge/deseq2/FXS-Control.csv"
+    params:
+        kallisto_dir = "results/dge/kallisto"
+    log:
+        "logs/deseq2.log"
+    message:
+        "Perform differential expression analysis for various conditions."
+    script:
+        "../scripts/DESeq2_kallisto_tximport.R"
