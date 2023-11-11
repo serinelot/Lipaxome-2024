@@ -17,6 +17,8 @@ workflow/data/references/gff3/
 workflow/data/references/geo_download.txt
 workflow/data/references/star_index/
 workflow/data/star_index/
+workflow/envs/htslib-1.9.tar.bz2
+workflow/envs/htslib-1.9/*
 workflow/git_repos/
 workflow/logs/
 workflow/results/
