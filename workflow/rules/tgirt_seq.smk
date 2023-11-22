@@ -1,11 +1,11 @@
 rule coco_ca:
     """ Generate corrected annotation from the gtf."""
     input:
-        gtf = 'data/references/gtf/homo_sapiens.gtf',
+        gtf = config["path"]["human_gtf"],
         paired_bam_to_bed12_dependency = rules.install_pairedBamToBed12.output,
         coco_dir = rules.download_coco_git.output.git_coco_folder
     output:
-        gtf_corrected = "data/references/gtf/correct_annotation.gtf"
+        gtf_corrected = "data/references/gtf/hg38_Ensembl_V101_Scottlab_2020_correct_annotation.gtf"
     params:
         rules.install_pairedBamToBed12.params.pairedBamToBed12_bin
     conda:
@@ -20,7 +20,7 @@ rule coco_cc:
     """Quantify the number of counts, counts per million (CPM) and transcript
         per million (TPM) for each gene using CoCo correct_count (cc)."""
     input:
-        gtf = "data/references/gtf/correct_annotation.gtf",
+        gtf = rules.coco_ca.output,
         bam = "results/STAR/{id}/Aligned.sortedByCoord.out.bam"
     output:
         counts = "results/tgirt/coco_cc/{id}.tsv"
@@ -50,7 +50,7 @@ rule merge_coco_cc_output:
         samples merged inside one dataframe). This rule takes in input the
         output result directory of CoCo within the TGIRT-Seq pipeline."""
     input:
-        counts = expand(rules.coco_cc.output.counts, id = id_list) 
+        counts = expand(rules.coco_cc.output.counts, id = id_list)
     output:
         merged_counts = "results/tgirt/coco_cc/merged_counts.tsv",
         merged_cpm = "results/tgirt/coco_cc/merged_cpm.tsv",

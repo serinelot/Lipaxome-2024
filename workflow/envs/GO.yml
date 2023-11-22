@@ -1,0 +1,11 @@
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+
+dependencies:
+  - numpy=1.22.3
+  - pandas=1.4.2
+  - matplotlib=3.5.2
+  - goatools=1.2.3
+

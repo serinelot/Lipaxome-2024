@@ -1,0 +1,12 @@
+wget https://github.com/samtools/htslib/releases/download/1.9/htslib-1.9.tar.bz2
+tar -vxjf htslib-1.9.tar.bz2
+
+cd htslib-1.9
+
+./configure --prefix=/home/serinelo/scratch/GSE202177/Lipaxome-2024/workflow/envs/htslib-1.9/htslib CPPFLAGS="-I/home/serinelo/miniconda3/envs/smake_deseq2/include"
+
+make
+make install
+
+export HTSLIB_LIBRARY_DIR=/home/serinelo/scratch/GSE202177/Lipaxome-2024/workflow/envs/htslib-1.9/htslib/lib
+export HTSLIB_INCLUDE_DIR=/home/serinelo/scratch/GSE202177/Lipaxome-2024/workflow/envs/htslib-1.9/htslib/include

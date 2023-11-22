@@ -8,5 +8,8 @@
     "human_gtf": "data/references/gtf/hg38_Ensembl_V101_Scottlab_2020.gtf",
     "human_genome_fa": "data/references/genome_fa/Homo_sapiens.GRCh38.dna.primary_assembly_V101.fa",
     "human_gff3": "data/references/gff3/hg38_Ensembl_V101_Scottlab_2020.gff3"
+  },
+  "tools": {
+    "majiq_voila": "/home/serinelo/scratch/GSE202177/Lipaxome-2024/workflow/envs/majiq_voila/bin/activate"
   }
 }

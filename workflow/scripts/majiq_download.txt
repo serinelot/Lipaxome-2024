@@ -1,0 +1,4 @@
+python3.8 -m venv majiq_voila
+source majiq_voila/bin/activate
+pip install git+https://bitbucket.org/biociphers/majiq_academic.git
+deactivate
