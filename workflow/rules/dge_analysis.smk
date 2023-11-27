@@ -14,7 +14,6 @@ rule build_transcriptome:
         "gffread {input.gtf} -g {input.genome} -w {output}"
 
 
-
 rule kallisto_index:
     input:
         rules.build_transcriptome.output
@@ -34,7 +33,6 @@ rule kallisto_index:
         "--kmer-size={params} "
         "{input} "
         "&> {log}"
-
 
 
 rule kallisto_quant:
@@ -66,7 +64,6 @@ rule kallisto_quant:
         "&> {log}"
 
 
-
 rule tx2gene:
     input:
         gtf = config["path"]["human_gtf"]
@@ -80,7 +77,6 @@ rule tx2gene:
         "../scripts/tx2gene.py"
 
 
-
 rule filter_gtf_pc_genes:
     input:
         gtf = config["path"]["human_gtf"]
@@ -92,7 +88,6 @@ rule filter_gtf_pc_genes:
         "Extract protein coding genes from the genome annotation file."
     shell:
         "grep \'protein_coding\' {input} > {output}"
-
 
 
 rule merge_kallisto_quant:
@@ -112,8 +107,6 @@ rule merge_kallisto_quant:
         "../scripts/merge_kallisto_quant.py"
 
 
-
-
 rule extract_cdn_values:
     output:
         cdn1_file = "data/cdn1.txt",
@@ -125,7 +118,6 @@ rule extract_cdn_values:
             cdn2 = lines[1].split()[1]
             f1.write(cdn1)
             f2.write(cdn2)
-
 
 
 rule deseq2:
@@ -145,8 +137,6 @@ rule deseq2:
         "Perform differential expression analysis for various conditions."
     script:
         "../scripts/DESeq2_kallisto_tximport.R"
-
-
 
 
 rule volcano_plot:
@@ -171,11 +161,11 @@ rule volcano_plot:
         "../scripts/volcano_plot.py"
 
 
-
-
 rule GO_analysis_upregulated_genes:
     input:
-        genes = rules.volcano_plot.output.up_genes
+        genes = rules.volcano_plot.output.up_genes,
+        go_obo = rules.go_basic_obo.output.go_obo,
+        go_gaf = rules.go_isoform_annotation_gaf.output.go_gaf
     output:
         bar_chart = "results/dge/GO/GO_{comp}_upregulated_genes.svg"
     log:

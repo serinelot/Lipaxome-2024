@@ -11,5 +11,9 @@
   },
   "tools": {
     "majiq_voila": "/home/serinelo/scratch/GSE202177/Lipaxome-2024/workflow/envs/majiq_voila/bin/activate"
+  },
+  "download": {
+    "go_basic_obo": "http://purl.obolibrary.org/obo/go/go-basic.obo",
+    "go_isoform_annotation_gaf": "http://geneontology.org/gene-associations/goa_human_rna.gaf.gz"
   }
 }

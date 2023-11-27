@@ -30,7 +30,9 @@ rule all_downloads:
         genome = expand('data/references/genome_fa/homo_sapiens_genome.fa'),
         fake_output_fastq = expand('data/references/geo_download.txt'),
         coco_dependency_download = "scripts/pairedBamToBed12/",
-        coco_git = 'git_repos/coco'
+        coco_git = 'git_repos/coco',
+        go_obo = 'data/references/GO/go-basic.obo',
+        go_gaf = 'data/references/GO/goa_human_isoform.gaf'
 
 rule dge:
     input:

@@ -15,7 +15,6 @@ rule download_human_sample_fastq:
         "touch geo_download.txt"
 
 
-
 rule install_pairedBamToBed12:
     output:
         directory("scripts/pairedBamToBed12/")
@@ -30,8 +29,6 @@ rule install_pairedBamToBed12:
         'make '
 
 
-
-
 rule download_coco_git:
     """Download git repository of CoCo."""
     output:
@@ -43,3 +40,26 @@ rule download_coco_git:
     shell:
         'mkdir -p {output.git_coco_folder} '
         '&& git clone {params.git_coco_link} {output.git_coco_folder}'
+
+
+rule go_basic_obo:
+    """ Download go-basic.obo file from Gene Ontology """
+    output:
+        go_obo = 'data/references/GO/go-basic.obo'
+    params:
+        link = config['download']['go_basic_obo']
+    shell:
+        "wget -O temp {params.link} && "
+        "mv temp {output.go_obo}"
+
+
+rule go_isoform_annotation_gaf:
+    """ Download goa_human_isoform.gaf file from Gene Ontology """
+    output:
+        go_gaf = 'data/references/GO/goa_human_isoform.gaf'
+    params:
+        link = config['download']['go_isoform_annotation_gaf']
+    shell:
+        "wget -O temp.gz {params.link} && "
+        "gunzip temp.gz && "
+        "mv temp {output.go_gaf}"

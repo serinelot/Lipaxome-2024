@@ -8,8 +8,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Load GO terms and associations
-obodag = obo_parser.GODag("http://purl.obolibrary.org/obo/go/go-basic.obo")  # Download go-basic.obo from the provided URL
-associations = read_gaf("http://current.geneontology.org/annotations/goa_human.gaf.gz")  # Download goa_human.gaf.gz from the provided URL
+obodag = obo_parser.GODag(snakemake.input.go_obo)  
+associations = read_gaf(snakemake.input.go_gaf)  
 
 # Get list of genes
 genes = list(pd.read_csv(snakemake.input.genes, sep='\t')['gene'])
@@ -19,14 +19,15 @@ go_enrichment = GOEnrichmentStudy(
     geneids=genes,
     pop=associations.keys(),
     assoc=associations,
-    obo=obodag,
+    obo_dag=obodag,
     propagate_counts=True,
     alpha=0.05,
     methods=['fdr_bh']
 )
 
 # Print significant GO terms
-significant_go_terms = [rec.GO for rec in go_enrichment.results if rec.p_fdr_bh < 0.05]
+results = go_enrichment.results
+significant_go_terms = [rec.GO for rec in results if rec.p_fdr_bh < 0.05]
 
 # Plotting GO bar charts
 if significant_go_terms:
