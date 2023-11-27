@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 obodag = obo_parser.GODag(snakemake.input.go_obo)  
 associations = read_gaf(snakemake.input.go_gaf)  
 
-# Get list of genes
+# Get list of genes from Snakemake input
 genes = list(pd.read_csv(snakemake.input.genes, sep='\t')['gene'])
 
 # Run GO enrichment analysis
@@ -25,9 +25,11 @@ go_enrichment = GOEnrichmentStudy(
     methods=['fdr_bh']
 )
 
+# Run the enrichment analysis with the study set (genes)
+go_enrichment_res = go_enrichment.run_study(set(genes))
+
 # Print significant GO terms
-results = go_enrichment.results
-significant_go_terms = [rec.GO for rec in results if rec.p_fdr_bh < 0.05]
+significant_go_terms = [rec.GO for rec in go_enrichment_res if rec.p_fdr_bh < 0.05]
 
 # Plotting GO bar charts
 if significant_go_terms:
@@ -57,4 +59,3 @@ if significant_go_terms:
     plt.savefig(snakemake.output.bar_chart)
 else:
     print("No significant GO terms found.")
-
