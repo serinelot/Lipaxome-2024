@@ -165,7 +165,7 @@ rule GO_analysis_upregulated_genes:
     input:
         genes = rules.volcano_plot.output.up_genes,
         go_obo = rules.go_basic_obo.output.go_obo,
-        go_gaf = rules.go_isoform_annotation_gaf.output.go_gaf
+        go_gaf = rules.go_annotation_gaf.output.go_gaf
     output:
         bar_chart = "results/dge/GO/GO_{comp}_upregulated_genes.svg"
     log:

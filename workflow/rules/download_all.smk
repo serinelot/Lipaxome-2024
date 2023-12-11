@@ -53,12 +53,12 @@ rule go_basic_obo:
         "mv temp {output.go_obo}"
 
 
-rule go_isoform_annotation_gaf:
-    """ Download goa_human_isoform.gaf file from Gene Ontology """
+rule go_annotation_gaf:
+    """ Download goa_human_rna.gaf file from Gene Ontology """
     output:
-        go_gaf = 'data/references/GO/goa_human_isoform.gaf'
+        go_gaf = 'data/references/GO/goa_human_rna.gaf'
     params:
-        link = config['download']['go_isoform_annotation_gaf']
+        link = config['download']['go_annotation_gaf']
     shell:
         "wget -O temp.gz {params.link} && "
         "gunzip temp.gz && "

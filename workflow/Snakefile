@@ -25,7 +25,6 @@ include: "rules/splicing.smk"
 rule all:
     input:
         qc_fq1_out = expand("data/qc/{id}_1_fastqc.html", id = id_list),
-        trimm_fq1 = expand("data/trimmed/{id}_1.fastq.gz", id = id_list),
         trimm_fq2 = expand("data/trimmed/{id}_2.fastq.gz", id = id_list),
         qc_trimm_fq2_out = expand("data/qc_trimmed/{id}_2_fastqc.html", id = id_list),
         chrNameLength = config['path']['chrNameLength'],
@@ -34,11 +33,11 @@ rule all:
 
 rule all_downloads:
     input:
-#        fake_output_fastq = expand('data/references/geo_download.txt'),
+        fake_output_fastq = expand('data/references/geo_download.txt'),
         coco_dependency_download = "scripts/pairedBamToBed12/",
         coco_git = 'git_repos/coco',
         go_obo = 'data/references/GO/go-basic.obo',
-        go_gaf = 'data/references/GO/goa_human_isoform.gaf'
+        go_gaf = 'data/references/GO/goa_human_rna.gaf'
 
 
 rule dge:
@@ -50,8 +49,8 @@ rule dge:
         pc_gtf = "data/references/gtf/hg38_Ensembl_V101_Scottlab_2020.protein_coding.gtf",
         tpm = "results/dge/kallisto/tpm.tsv",
         deseq2 = expand('results/dge/deseq2/{comp}.csv', comp = comparisons),
-        volcano = expand("results/dge/volcano_plot/{comp}.svg", comp = comparisons),
-        GO_analysis_upregulated_genes = expand("results/dge/GO/GO_{comp}_upregulated_genes.svg", comp = comparisons) #BESOIN D'INTERNET: PROFIL LOCAL
+        volcano = expand("results/dge/volcano_plot/{comp}.svg", comp = comparisons)
+#        GO_analysis_upregulated_genes = expand("results/dge/GO/GO_{comp}_upregulated_genes.svg", comp = comparisons) #BESOIN D'INTERNET: PROFIL LOCAL
 
 rule tgirt:
     input:
@@ -67,5 +66,5 @@ rule splicing:
         primary_alignments = expand("results/splicing/star/{id}/{id}_Aligned.sortedByCoord.out.primary.bam", id = id_list),
         bam_index = expand("results/splicing/star/{id}/{id}_Aligned.sortedByCoord.out.primary.bam.bai", id = id_list),
         genomecov = expand("results/splicing/genomecov/{id}.bedgraph", id = id_list),
-        majiq_build = "results/splicing/majiq/build/splicegraph.sql",
-        majiq_deltapsi_quant = "results/splicing/majiq/deltapsi_quant.deltapsi.voila"
+        majiq_build = "results/splicing/majiq/build/splicegraph.sql"
+#        majiq_deltapsi_quant = "results/splicing/majiq/deltapsi_quant.deltapsi.voila"
