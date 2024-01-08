@@ -26,14 +26,14 @@ rule all:
     input:
         qc_fq1_out = expand("data/qc/{id}_1_fastqc.html", id = id_list),
         trimm_fq2 = expand("data/trimmed/{id}_2.fastq.gz", id = id_list),
-        qc_trimm_fq2_out = expand("data/qc_trimmed/{id}_2_fastqc.html", id = id_list),
+#        qc_trimm_fq2_out = expand("data/qc_trimmed/{id}_2_fastqc.html", id = id_list),
         chrNameLength = config['path']['chrNameLength'],
-        bam = expand("results/STAR/{id}/Aligned.sortedByCoord.out.bam", id = id_list),
-        bam_logs = expand("results/STAR/{id}/Log.final.out", id = id_list)
+        bam = expand("results/STAR/{id}/Aligned.sortedByCoord.out.bam", id = id_list)
+#        bam_logs = expand("results/STAR/{id}/Log.final.out", id = id_list)
 
 rule all_downloads:
     input:
-        fake_output_fastq = expand('data/references/geo_download.txt'),
+        #fake_output_fastq = expand('data/references/geo_download.txt'),
         coco_dependency_download = "scripts/pairedBamToBed12/",
         coco_git = 'git_repos/coco',
         go_obo = 'data/references/GO/go-basic.obo',
