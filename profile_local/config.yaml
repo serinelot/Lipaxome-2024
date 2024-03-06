@@ -1,4 +1,4 @@
 use-conda: True
-conda-frontend: mamba
+conda-frontend: conda
 cores: 1
 rerun-triggers: mtime

@@ -9,6 +9,10 @@ def get_samples_for_cond(con):
     
     return samples
 
+def majiq_deltapsi_name_format(wildcards):
+
+    return " ".join(wildcards.comp.split("-"))
+
 def get_majiq_deltapsi_group_id(comp):
 
     # Get cond1 and cond2 as a list
@@ -23,16 +27,15 @@ def get_majiq_files_deltapsi(comp):
     cond1_samples = get_samples_for_cond(cond1)
     cond2_samples = get_samples_for_cond(cond2)
 
-    cond1_majiq = [
-        'results/splicing/majiq/build/{id}_Aligned.sortedByCoord.out.primary.majiq'
-        for id in cond1_samples
-    ]
-    cond2_majiq = [
-        'results/splicing/majiq/build/{id}_Aligned.sortedByCoord.out.primary.majiq'
-        for id in cond2_samples
-    ]
+    cond1_majiq = ' '.join([
+        'results/majiq/'+comp+f'/build/{sample_id}_Aligned.sortedByCoord.out.primary.majiq'
+        for sample_id in cond1_samples
+    ])
+    cond2_majiq = ' '.join([
+        'results/majiq/'+comp+f'/build/{sample_id}_Aligned.sortedByCoord.out.primary.majiq'
+        for sample_id in cond2_samples
+    ])
     return cond1_majiq, cond2_majiq
-
 
 def majiq_cond1(wildcards):
 

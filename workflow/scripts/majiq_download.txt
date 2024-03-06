@@ -1,4 +1,17 @@
-python3.8 -m venv majiq_voila
+conda install -c conda-forge cryptography=41.0.5=py312h241aef2_0
+conda install -c conda-forge gcc
+conda install git
+conda remove libgrpc
+conda install libgrpc=1.59.3
+conda install grpcio=1.59.3=py312hb06c811_0
+conda install pyarrow=14.0.1
+
+#télécharger rust (PAS BESOIN SI CRYPTOGRAPHY=41.0.5 EST TÉLÉCHARGER VIA CONDA)
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+#choix 3 (StdEnv/2023)
+python3.10 -m venv majiq_voila	
 source majiq_voila/bin/activate
+
 pip install git+https://bitbucket.org/biociphers/majiq_academic.git
 deactivate

@@ -13,4 +13,4 @@ download:
   go_annotation_gaf: "http://geneontology.org/gene-associations/goa_human_rna.gaf.gz"
 
 tools:
-  majiq_voila: "/home/serinelo/scratch/GSE202177/Lipaxome-2024/workflow/envs/majiq_voila/bin/activate"
+  majiq_voila: "/home/serinelo/scratch/Lipaxome-2024/workflow/envs/majiq_voila/bin/activate"

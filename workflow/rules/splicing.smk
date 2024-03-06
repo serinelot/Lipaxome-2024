@@ -72,21 +72,22 @@ rule majiq_build:
 
 rule majiq_deltapsi_quant:
     input:
-        build_dir = expand(rules.majiq_build.output.majiq_files, id = id_list),
-        comp = lambda wildcards: get_majiq_deltapsi_group_id(wildcards.id)
+        build_dir = rules.majiq_build.output.majiq_files
     output:
-        voila = "results/splicing/majiq/deltapsi_quant.deltapsi.voila"
+        voila = "results/splicing/majiq/deltapsi_quant/FXS-Control.deltapsi.voila"
     params:
         outdir = directory("results/splicing/majiq/deltapsi_quant"),
-        group = "FXS-Control",
-        majiq_tool = config["tools"]["majiq_voila"]
+        group = majiq_deltapsi_name_format,
+        majiq_tool = config["tools"]["majiq_voila"],
+        grp1_majiq_files = majiq_cond1,
+        grp2_majiq_files = majiq_cond2
     log:
         "logs/majiq/deltapsi_quant.log"
     message:
-        "Quantify differential splicing between two different groups: FXS-Control."
+        "Quantify differential splicing between two different groups: {wildcards.comp}."
     shell:
         "source {params.majiq_tool} && "
-        "majiq deltapsi -grp1 {input.comp[0]} -grp2 {input.comp[1]} "
+        "majiq deltapsi -grp1 {params.grp1_majiq_files} -grp2 {params.grp2_majiq_files} "
         "-j 8 -o {params.outdir} --name {params.group} "
         "&> {log} && deactivate"
 

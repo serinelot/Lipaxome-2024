@@ -3,10 +3,10 @@ tar -vxjf htslib-1.9.tar.bz2
 
 cd htslib-1.9
 
-./configure --prefix=/home/serinelo/scratch/GSE202177/Lipaxome-2024/workflow/envs/htslib-1.9/htslib CPPFLAGS="-I/home/serinelo/miniconda3/envs/smake_deseq2/include"
+./configure --prefix=/home/serinelo/scratch/Lipaxome-2024/workflow/envs/htslib-1.9/htslib CPPFLAGS="-I/home/serinelo/miniconda3/envs/smake_deseq2_majiq/include"
 
 make
 make install
 
-export HTSLIB_LIBRARY_DIR=/home/serinelo/scratch/GSE202177/Lipaxome-2024/workflow/envs/htslib-1.9/htslib/lib
-export HTSLIB_INCLUDE_DIR=/home/serinelo/scratch/GSE202177/Lipaxome-2024/workflow/envs/htslib-1.9/htslib/include
+export HTSLIB_LIBRARY_DIR=/home/serinelo/scratch/Lipaxome-2024/workflow/envs/htslib-1.9/htslib/lib
+export HTSLIB_INCLUDE_DIR=/home/serinelo/scratch/Lipaxome-2024/workflow/envs/htslib-1.9/htslib/include
