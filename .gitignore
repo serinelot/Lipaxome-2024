@@ -25,4 +25,5 @@ workflow/git_repos/
 workflow/logs/
 workflow/results/
 workflow/scripts/pairedBamToBed12/
+workflow/scripts/split_bams_files.sh
 workflow/slurm-*.out

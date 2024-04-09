@@ -95,25 +95,24 @@ deseq2:
 primary_alignments:
     cpus-per-task: 2
     mem: 4G
-    time: 0-0:30:00
+    time: 0-1:00:00
 
 bam_index:
     cpus-per-task: 2
     mem: 4G
-    time: 0-0:30:00
-
-genomecov:
-    cpus-per-task: 16
-    mem: 60G
-    time: 0-6:00:00
-
-majiq_build:
-    cpus-per-task: 32
-    mem: 128G
-    time: 0-6:00:00
-
-majiq_deltapsi_quant:
-    cpus-per-task: 4
-    mem: 8G
     time: 0-1:00:00
 
+execute_split_bams_files:
+    cpus-per-task: 4
+    mem: 4G
+    time: 0-0:30:00
+
+run_rmats:
+    cpus-per-task: 12
+    mem: 15G
+    time: 0-6:00:00
+
+test_run_rmats:
+    cpus-per-task: 12
+    mem: 15G
+    time: 0-6:00:00

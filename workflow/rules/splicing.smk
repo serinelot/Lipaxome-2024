@@ -15,7 +15,6 @@ rule primary_alignments:
         "&> {log}"
 
 
-
 rule bam_index:
     input:
         rules.primary_alignments.output
@@ -32,7 +31,6 @@ rule bam_index:
         "&> {log}"
 
 
-
 rule genomecov:
     input:
         rules.primary_alignments.output
@@ -43,51 +41,83 @@ rule genomecov:
     message:
         "Report {wildcards.id} genome coverage in BEDGRAPH format."
     shell:
-        "bedtools genomecov -bg -split -ibam {input} | sort -k1,1 -k2,2n > {output}" 
+        "bedtools genomecov -bg -split -ibam {input} | sort -k1,1 -k2,2n > {output}"
 
 
-
-rule majiq_build:
+rule split_bams_files:
     input:
-        gff3 = config["path"]["human_gff3"],
-        bai = expand(rules.bam_index.output, id = id_list)
+        design="data/design.tsv"
     output:
-        splicegraph = "results/splicing/majiq/build/splicegraph.sql",
-        majiq_files = expand('results/splicing/majiq/build/{id}_Aligned.sortedByCoord.out.primary.majiq', id = id_list, allow_missing=True)
-    params:
-        config = "data/majiq.conf",
-        outdir = directory("results/splicing/majiq/build/"),
-        majiq = config["tools"]["majiq_voila"]
-    log:
-        "logs/majiq/build.log"
-    message:
-        "Analyze RNA-seq data to detect LSV candidates using MAJIQ. "
-        "Preinstallation of MAJIQ is required prior to running this rule."
+        "scripts/split_bams_files.sh"
     shell:
-        "source {params.majiq} && "
-        "majiq build {input.gff3} -c {params.config} -j 8 -o {params.outdir} "
-        "&> {log} && deactivate"
+        """
+        python scripts/split_bams_by_cond.py
+        """
 
-
-
-rule majiq_deltapsi_quant:
+rule execute_split_bams_files:
     input:
-        build_dir = rules.majiq_build.output.majiq_files
+        "scripts/split_bams_files.sh"
     output:
-        voila = "results/splicing/majiq/deltapsi_quant/FXS-Control.deltapsi.voila"
-    params:
-        outdir = directory("results/splicing/majiq/deltapsi_quant"),
-        group = majiq_deltapsi_name_format,
-        majiq_tool = config["tools"]["majiq_voila"],
-        grp1_majiq_files = majiq_cond1,
-        grp2_majiq_files = majiq_cond2
-    log:
-        "logs/majiq/deltapsi_quant.log"
-    message:
-        "Quantify differential splicing between two different groups: {wildcards.comp}."
+        "results/splicing/star/split_bam_done.txt"
     shell:
-        "source {params.majiq_tool} && "
-        "majiq deltapsi -grp1 {params.grp1_majiq_files} -grp2 {params.grp2_majiq_files} "
-        "-j 8 -o {params.outdir} --name {params.group} "
-        "&> {log} && deactivate"
+        """
+        bash {input}
+        touch results/splicing/star/split_bam_done.txt
+        """
 
+
+rule create_bam_lists_for_rmats:
+    output:
+        fxs_bam_list = "results/splicing/rmats/fxs_bam_list.txt",
+        control_bam_list = "results/splicing/rmats/control_bam_list.txt"
+    shell:
+        """
+        find results/splicing/star_FXS/ -name '*_Aligned.sortedByCoord.out.primary.bam' -print0 | sort -z | xargs -0 printf '%s,' | sed 's/,$/\\n/' > {output.fxs_bam_list}
+        find results/splicing/star_Control/ -name '*_Aligned.sortedByCoord.out.primary.bam' -print0 | sort -z | xargs -0 printf '%s,' | sed 's/,$/\\n/' > {output.control_bam_list}
+        """
+
+
+rule run_rmats:
+    input:
+        bam = expand(rules.primary_alignments.output, id = id_list),
+        group1 = "results/splicing/rmats/fxs_bam_list.txt",
+        group2 = "results/splicing/rmats/control_bam_list.txt",
+        gtf = config["path"]["human_gtf"]
+    output:
+        outdir = directory("results/splicing/rmats/{comp}/raw"),
+        tmpdir = directory("results/splicing/rmats/{comp}/tmp"),
+        summary = "results/splicing/rmats/{comp}/raw/summary.txt"
+    params:
+        readlength = 150
+    conda:
+        "../envs/rmats.yml"
+    log:
+        "logs/rmats/{comp}.log"
+    message:
+        "Run rMATS for {wildcards.comp}."
+    shell:
+        "rmats.py --b1 {input.group1} --b2 {input.group2} "
+        "--gtf {input.gtf} -t paired --readLength {params.readlength} --variable-read-length "
+        "--nthread 4 --od {output.outdir} --tmp {output.tmpdir}"
+        "&> {log}"
+
+
+rule filter_rmats:
+    input:
+        summary = rules.run_rmats.output.summary
+    output:
+        result = 'results/splicing/rmats/{comp}/filtered/SE.tsv'
+    params:
+        dir = directory("results/splicing/rmats/{comp}"),
+        tpm = rules.merge_kallisto_quant.output.tpm,
+        gtf = config["path"]["human_gtf"],
+        fdr = 0.01,
+        deltapsi = 0.10
+    conda:
+        "../envs/python.yml"
+    log:
+        "logs/rmats/filter_{comp}.log"
+    message:
+        "Filter raw rMATS output for {wildcards.comp}."
+    script:
+        "../scripts/filter_rmats.py"
