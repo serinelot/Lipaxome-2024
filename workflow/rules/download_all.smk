@@ -1,8 +1,5 @@
 rule download_human_sample_fastq:
-    """Download fastq of human samples from GEO. This step
-        might take long, depending on your downloading speed. Other samples were
-        manually added on the cluster. To automate the download of ALL samples,
-        simply add their SRR id in the config file (use SRA explorer to find the URL)"""
+    """Téléchargement des données de RNA-Seq du projet Lipaxome"""
     output:
         "data/references/geo_download.txt"
     params:
@@ -15,18 +12,18 @@ rule download_human_sample_fastq:
         "touch geo_download.txt"
 
 
-rule install_pairedBamToBed12:
-    output:
-        directory("scripts/pairedBamToBed12/")
-    params:
-        pairedBamToBed12_bin = 'scripts/pairedBamToBed12/bin'
-    conda:
-        "../envs/coco.yml"
-    shell:
-        'mkdir -p scripts && cd scripts && pwd && '
-        'git clone https://github.com/Population-Transcriptomics/pairedBamToBed12 && '
-        'cd pairedBamToBed12 && '
-        'make '
+# rule install_pairedBamToBed12:
+#     output:
+#         directory("scripts/pairedBamToBed12/")
+#     params:
+#         pairedBamToBed12_bin = 'scripts/pairedBamToBed12/bin'
+#     conda:
+#         "../envs/coco.yml"
+#     shell:
+#         'mkdir -p scripts && cd scripts && pwd && '
+#         'git clone https://github.com/Population-Transcriptomics/pairedBamToBed12 && '
+#         'cd pairedBamToBed12 && '
+#         'make '
 
 
 rule download_coco_git:

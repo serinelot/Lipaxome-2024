@@ -88,7 +88,7 @@ rule run_rmats:
         tmpdir = directory("results/splicing/rmats/{comp}/tmp"),
         summary = "results/splicing/rmats/{comp}/raw/summary.txt"
     params:
-        readlength = 150
+        readlength = 80
     conda:
         "../envs/rmats.yml"
     log:
@@ -111,7 +111,7 @@ rule filter_rmats:
         dir = directory("results/splicing/rmats/{comp}"),
         tpm = rules.merge_kallisto_quant.output.tpm,
         gtf = config["path"]["human_gtf"],
-        fdr = 0.01,
+        fdr = 0.05,
         deltapsi = 0.10
     conda:
         "../envs/python.yml"

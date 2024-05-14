@@ -10,37 +10,37 @@ __default__:
 trimming:
     cpus-per-task: 4
     mem: 1G
-    time: 0-2:30:00
+    time: 0-0:30:00
 
 qc:
     cpus-per-task: 6
     mem: 2G
-    time: 0-3:00:00
+    time: 0-0:30:00
 
 qc_trimm:
     cpus-per-task: 6
     mem: 2G
-    time: 0-1:30:00
+    time: 0-0:30:00
 
 star_index:
     cpus-per-task: 32
     mem: 70G
-    time: 0-1:30:00
+    time: 0-0:45:00
 
 star_alignReads:
     cpus-per-task: 32
     mem: 130G
-    time: 0-2:30:00
+    time: 0-1:00:00
 
 coco_ca:
     cpus-per-task: 1
     mem: 8G
-    time: 0-2:00:00
+    time: 0-0:30:00
 
 coco_cc:
     cpus-per-task: 8
-    mem: 12G
-    time: 0-8:00:00
+    mem: 24G
+    time: 0-12:00:00
 
 merge_coco_cc_output:
     cpus-per-task: 2
@@ -70,7 +70,7 @@ kallisto_index:
 kallisto_quant:
     cpus-per-task: 32
     mem: 60G
-    time: 0-6:00:00
+    time: 0-3:00:00
 
 tx2gene:
     cpus-per-task: 2
@@ -85,7 +85,7 @@ filter_gtf_pc_genes:
 merge_kallisto_quant:
     cpus-per-task: 8
     mem: 16G
-    time: 0-2:00:00
+    time: 0-1:00:00
 
 deseq2:
     cpus-per-task: 8
@@ -108,11 +108,11 @@ execute_split_bams_files:
     time: 0-0:30:00
 
 run_rmats:
-    cpus-per-task: 12
-    mem: 15G
-    time: 0-6:00:00
+    cpus-per-task: 5
+    mem: 4G
+    time: 0-1:00:00
 
-test_run_rmats:
-    cpus-per-task: 12
-    mem: 15G
-    time: 0-6:00:00
+filter_rmats:
+    cpus-per-task: 1
+    mem: 4G
+    time: 0-1:00:00

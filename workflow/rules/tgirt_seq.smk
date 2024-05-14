@@ -2,16 +2,12 @@ rule coco_ca:
     """ Generate corrected annotation from the gtf."""
     input:
         gtf = config["path"]["human_gtf"],
-        paired_bam_to_bed12_dependency = rules.install_pairedBamToBed12.output,
         coco_dir = rules.download_coco_git.output.git_coco_folder
     output:
         gtf_corrected = "data/references/gtf/hg38_Ensembl_V101_Scottlab_2020_correct_annotation.gtf"
-    params:
-        rules.install_pairedBamToBed12.params.pairedBamToBed12_bin
     conda:
         "../envs/coco.yml"
     shell:
-        "export PATH=$PWD/{params}:$PATH && "
         "python3 git_repos/coco/bin/coco.py ca {input.gtf} -o {output.gtf_corrected}"
 
 
@@ -62,38 +58,38 @@ rule merge_coco_cc_output:
 
 
 
-rule coco_cb:
-    """ Create a bedgraph from the bam files """
-    input:
-        bam = rules.star_alignReads.output.bam,
-        chrNameLength = rules.star_index.output.chrNameLength
-    output:
-        unsorted_bedgraph = "results/tgirt/coco_cb/{id}_unsorted.bedgraph"
-    params:
-        pb = rules.install_pairedBamToBed12.params.pairedBamToBed12_bin,
-        coco_path = "git_repos/coco/bin"
-    conda:
-        "../envs/coco.yml"
-    threads:
-        28
-    shell:
-        "export PATH=$PWD/{params.pb}:$PATH && "
-        "python {params.coco_path}/coco.py cb "
-        "-u " # UCSC compatible (adds a chr and track info)
-        "-t {threads} "
-        "-c 2500000 " # Chunk size, default value
-        "{input.bam} "
-        "{output.unsorted_bedgraph} "
-        "{input.chrNameLength}"
+# rule coco_cb:
+#     """ Create a bedgraph from the bam files """
+#     input:
+#         bam = rules.star_alignReads.output.bam,
+#         chrNameLength = rules.star_index.output.chrNameLength
+#     output:
+#         unsorted_bedgraph = "results/tgirt/coco_cb/{id}_unsorted.bedgraph"
+#     params:
+#         pb = rules.install_pairedBamToBed12.params.pairedBamToBed12_bin,
+#         coco_path = "git_repos/coco/bin"
+#     conda:
+#         "../envs/coco.yml"
+#     threads:
+#         28
+#     shell:
+#         "export PATH=$PWD/{params.pb}:$PATH && "
+#         "python {params.coco_path}/coco.py cb "
+#         "-u " # UCSC compatible (adds a chr and track info)
+#         "-t {threads} "
+#         "-c 2500000 " # Chunk size, default value
+#         "{input.bam} "
+#         "{output.unsorted_bedgraph} "
+#         "{input.chrNameLength}"
 
 
 
-rule sort_bg:
-    """ Sort the new bedgraphs and change the chrM to chrMT to work with bedGraphToBigWig """
-    input:
-        unsorted_bedgraph = rules.coco_cb.output.unsorted_bedgraph
-    output:
-        sorted_bedgraph = "results/tgirt/coco_cb/{id}.bedgraph"
-    shell:
-        "sort -k1,1 -k2,2n {input.unsorted_bedgraph} "
-        "| sed 's/chrM/chrMT/g' > {output.sorted_bedgraph}"
+# rule sort_bg:
+#     """ Sort the new bedgraphs and change the chrM to chrMT to work with bedGraphToBigWig """
+#     input:
+#         unsorted_bedgraph = rules.coco_cb.output.unsorted_bedgraph
+#     output:
+#         sorted_bedgraph = "results/tgirt/coco_cb/{id}.bedgraph"
+#     shell:
+#         "sort -k1,1 -k2,2n {input.unsorted_bedgraph} "
+#         "| sed 's/chrM/chrMT/g' > {output.sorted_bedgraph}"

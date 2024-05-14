@@ -45,7 +45,7 @@ rule all:
 rule all_downloads:
     input:
         fake_output_fastq = expand('data/references/geo_download.txt'),
-        coco_dependency_download = "scripts/pairedBamToBed12/",
+        #coco_dependency_download = "scripts/pairedBamToBed12/",
         coco_git = 'git_repos/coco',
         go_obo = 'data/references/GO/go-basic.obo',
         go_gaf = 'data/references/GO/goa_human_rna.gaf'
@@ -59,25 +59,25 @@ rule dge:
         tx2gene = "data/references/tx2gene.tsv",
         pc_gtf = "data/references/gtf/hg38_Ensembl_V101_Scottlab_2020.protein_coding.gtf",
         tpm = "results/dge/kallisto/tpm.tsv",
-        deseq2 = expand('results/dge/deseq2/{comp}.csv', comp = comparisons),
-        volcano = expand("results/dge/volcano_plot/{comp}.svg", comp = comparisons)
-#        GO_analysis_upregulated_genes = expand("results/dge/GO/GO_{comp}_upregulated_genes.svg", comp = comparisons) #BESOIN D'INTERNET: PROFIL LOCAL
+        deseq2 = expand('results/dge/deseq2/{comp}.csv', comp = comparisons)
+        #volcano = expand("results/dge/volcano_plot/{comp}.svg", comp = comparisons)
+        #GO_analysis_upregulated_genes = expand("results/dge/GO/GO_{comp}_upregulated_genes.svg", comp = comparisons) #BESOIN D'INTERNET: PROFIL LOCAL
 
 rule tgirt:
     input:
         gtf_corrected = "data/references/gtf/hg38_Ensembl_V101_Scottlab_2020_correct_annotation.gtf",
         coco_cc = expand("results/tgirt/coco_cc/{id}.tsv", id = id_list),
-        merged_counts = "results/tgirt/coco_cc/merged_counts.tsv",
-        unsorted_bedgraph = expand("results/tgirt/coco_cb/{id}_unsorted.bedgraph", id = id_list),
-        sorted_bedgraph = expand("results/tgirt/coco_cb/{id}.bedgraph", id = id_list)
+        merged_counts = "results/tgirt/coco_cc/merged_counts.tsv"
+#         unsorted_bedgraph = expand("results/tgirt/coco_cb/{id}_unsorted.bedgraph", id = id_list),
+#         sorted_bedgraph = expand("results/tgirt/coco_cb/{id}.bedgraph", id = id_list)
 
 
 rule splicing:
     input:
         primary_alignments = expand("results/splicing/star/{id}/{id}_Aligned.sortedByCoord.out.primary.bam", id = id_list),
         bam_index = expand("results/splicing/star/{id}/{id}_Aligned.sortedByCoord.out.primary.bam.bai", id = id_list),
-        #split_bams_files = "scripts/split_bams_files.sh", #LOCAL
-        #execute_split_bams_files = "results/splicing/star/split_bam_done.txt",
+        split_bams_files = "scripts/split_bams_files.sh", #LOCAL
+        execute_split_bams_files = "results/splicing/star/split_bam_done.txt",
         create_bam_lists_for_rmats = "results/splicing/rmats/control_bam_list.txt", #Local
         run_rmats = expand("results/splicing/rmats/{comp}/raw/summary.txt", comp = comparisons),
         filter_rmats = expand('results/splicing/rmats/{comp}/filtered/SE.tsv', comp = comparisons)
