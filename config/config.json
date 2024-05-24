@@ -1,13 +1,13 @@
 path:
   fastq: "data/references/fastq/"
-  human_gtf: "data/references/gtf/hg38_Ensembl_V101_Scottlab_2020.gtf"
-  human_genome_fa: "data/references/genome_fa/Homo_sapiens.GRCh38.dna.primary_assembly_V101.fa"
   chrNameLength: "data/references/star_index/chrNameLength.txt"
   star_index: "data/references/star_index/"
   transcriptome : "data/references/transcriptome.fa"
-  human_gff3: "data/references/gff3/hg38_Ensembl_V101_Scottlab_2020.gff3"
   coco_git_link: "https://github.com/scottgroup/coco.git"
 
 download:
+  human_gtf: "http://ftp.ensembl.org/pub/release-112/gtf/homo_sapiens/Homo_sapiens.GRCh38.112.gtf.gz"
+  human_genome_fa: "http://ftp.ensembl.org/pub/release-112/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz"
+  human_gff3: "http://ftp.ensembl.org/pub/release-112/gff3/homo_sapiens/Homo_sapiens.GRCh38.112.gff3.gz"
   go_basic_obo: "http://purl.obolibrary.org/obo/go/go-basic.obo"
   go_annotation_gaf: "http://geneontology.org/gene-associations/goa_human_rna.gaf.gz"

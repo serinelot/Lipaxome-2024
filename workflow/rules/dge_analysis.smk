@@ -1,7 +1,7 @@
 rule build_transcriptome:
     input:
-        genome = config["path"]["human_genome_fa"],
-        gtf = config["path"]["human_gtf"]   
+        genome = rules.download_human_genome.output.genome,
+        gtf = rules.download_human_gtf.output.gtf   
     output:
         config["path"]["transcriptome"]
     conda:
@@ -38,8 +38,8 @@ rule kallisto_index:
 rule kallisto_quant:
     input:
         idx = rules.kallisto_index.output,
-        fq1 = rules.trimming.output.trimm_fq1,
-        fq2 = rules.trimming.output.trimm_fq2
+        fq1 = rules.fastp.output.fastq1,
+        fq2 = rules.fastp.output.fastq2
     output:
         "results/dge/kallisto/{id}/abundance.tsv"
     params:
@@ -66,7 +66,7 @@ rule kallisto_quant:
 
 rule tx2gene:
     input:
-        gtf = config["path"]["human_gtf"]
+        gtf = rules.download_human_gtf.output.gtf
     output:
         tsv = "data/references/tx2gene.tsv"
     conda:
@@ -79,9 +79,9 @@ rule tx2gene:
 
 rule filter_gtf_pc_genes:
     input:
-        gtf = config["path"]["human_gtf"]
+        gtf = rules.download_human_gtf.output.gtf
     output:
-        pc_gtf = "data/references/gtf/hg38_Ensembl_V101_Scottlab_2020.protein_coding.gtf"
+        pc_gtf = "data/references/gtf/homo_sapiens.protein_coding.gtf"
     log:
         "logs/kallisto/filter_gtf_pc_genes.log"
     message:
@@ -120,59 +120,59 @@ rule extract_cdn_values:
             f2.write(cdn2)
 
 
-rule deseq2:
+rule deseq2_mRNA:
     input:
         quant = expand("results/dge/kallisto/{id}/abundance.tsv", id=id_list),
         samples = "data/design.tsv",
         comparisons = "data/comparisons.tsv",
         gene_id = "data/references/tx2gene.tsv"
     output:
-        results = directory("results/dge/deseq2"),
-        out_files = expand('results/dge/deseq2/{comp}.csv', comp = comparisons)
+        results = directory("results/dge/deseq2_mRNA"),
+        out_files = expand('results/dge/deseq2_mRNA/{comp}.csv', comp = comparisons)
     params:
         kallisto_dir = "results/dge/kallisto"
     log:
-        "logs/deseq2_test.log"
+        "logs/deseq2_mRNA.log"
     message:
         "Perform differential expression analysis for various conditions."
     script:
         "../scripts/DESeq2_kallisto_tximport.R"
 
 
-rule volcano_plot:
-    input:
-        DE_outdir = rules.deseq2.output.results,
-        DE_output = "results/dge/deseq2/{comp}.csv",
-        filtered_genes = rules.merge_kallisto_quant.output.tpm,
-        gtf = rules.filter_gtf_pc_genes.output.pc_gtf
-    output:
-        volcano = "results/dge/volcano_plot/{comp}.svg",
-        up_genes = "results/dge/volcano_plot/{comp}_sig_diffexp_genes_up.tsv",
-        down_genes = "results/dge/volcano_plot/{comp}_sig_diffexp_genes_down.tsv"
-    params:
-        pval_threshold = 0.05
-    log:
-        "logs/volcano_plot/{comp}.log"
-    conda:
-        "../envs/python.yml"
-    message:
-        "Create a volcano plot using deseq2 output for each comparison in comparisons.tsv."
-    script:
-        "../scripts/volcano_plot.py"
+# rule volcano_plot:
+#     input:
+#         DE_outdir = rules.deseq2.output.results,
+#         DE_output = "results/dge/deseq2/{comp}.csv",
+#         filtered_genes = rules.merge_kallisto_quant.output.tpm,
+#         gtf = rules.filter_gtf_pc_genes.output.pc_gtf
+#     output:
+#         volcano = "results/dge/volcano_plot/{comp}.svg",
+#         up_genes = "results/dge/volcano_plot/{comp}_sig_diffexp_genes_up.tsv",
+#         down_genes = "results/dge/volcano_plot/{comp}_sig_diffexp_genes_down.tsv"
+#     params:
+#         pval_threshold = 0.05
+#     log:
+#         "logs/volcano_plot/{comp}.log"
+#     conda:
+#         "../envs/python.yml"
+#     message:
+#         "Create a volcano plot using deseq2 output for each comparison in comparisons.tsv."
+#     script:
+#         "../scripts/volcano_plot.py"
 
 
-rule GO_analysis_upregulated_genes:
-    input:
-        genes = rules.volcano_plot.output.up_genes,
-        go_obo = rules.go_basic_obo.output.go_obo,
-        go_gaf = rules.go_annotation_gaf.output.go_gaf
-    output:
-        bar_chart = "results/dge/GO/GO_{comp}_upregulated_genes.svg"
-    log:
-        "logs/GO/{comp}_upregulated_genes.log"
-    conda: 
-        "../envs/GO.yml"
-    message:
-        "GO analysis of upregulated genes in {wildcards.comp} represented as a bar chart."
-    script:
-        "../scripts/GO_bar_charts.py"
+# rule GO_analysis_upregulated_genes:
+#     input:
+#         genes = rules.volcano_plot.output.up_genes,
+#         go_obo = rules.go_basic_obo.output.go_obo,
+#         go_gaf = rules.go_annotation_gaf.output.go_gaf
+#     output:
+#         bar_chart = "results/dge/GO/GO_{comp}_upregulated_genes.svg"
+#     log:
+#         "logs/GO/{comp}_upregulated_genes.log"
+#     conda: 
+#         "../envs/GO.yml"
+#     message:
+#         "GO analysis of upregulated genes in {wildcards.comp} represented as a bar chart."
+#     script:
+#         "../scripts/GO_bar_charts.py"

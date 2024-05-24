@@ -1,7 +1,7 @@
 rule coco_ca:
     """ Generate corrected annotation from the gtf."""
     input:
-        gtf = config["path"]["human_gtf"],
+        gtf = config["download"]["human_gtf"],
         coco_dir = rules.download_coco_git.output.git_coco_folder
     output:
         gtf_corrected = "data/references/gtf/hg38_Ensembl_V101_Scottlab_2020_correct_annotation.gtf"

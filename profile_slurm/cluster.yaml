@@ -7,17 +7,27 @@ __default__:
     mail-user: "bens3307@usherbrooke.ca"
     mail-type: FAIL
 
-trimming:
+trimmomatic:
     cpus-per-task: 4
     mem: 1G
     time: 0-0:30:00
+
+fastp:
+    cpus-per-task: 4
+    mem: 5G
+    time: 0-0:20:00
 
 qc:
     cpus-per-task: 6
     mem: 2G
     time: 0-0:30:00
 
-qc_trimm:
+qc_trimmomatic:
+    cpus-per-task: 6
+    mem: 2G
+    time: 0-0:30:00
+
+qc_fastp:
     cpus-per-task: 6
     mem: 2G
     time: 0-0:30:00
@@ -87,7 +97,7 @@ merge_kallisto_quant:
     mem: 16G
     time: 0-1:00:00
 
-deseq2:
+deseq2_mRNA:
     cpus-per-task: 8
     mem: 8G
     time: 0-0:15:00
@@ -108,9 +118,9 @@ execute_split_bams_files:
     time: 0-0:30:00
 
 run_rmats:
-    cpus-per-task: 5
+    cpus-per-task: 6
     mem: 4G
-    time: 0-1:00:00
+    time: 0-0:30:00
 
 filter_rmats:
     cpus-per-task: 1
