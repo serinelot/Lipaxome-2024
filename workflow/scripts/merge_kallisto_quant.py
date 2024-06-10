@@ -7,64 +7,77 @@ import os
 tx2gene = snakemake.input.tx2gene
 gtf = snakemake.input.gtf
 outfile = snakemake.output.tpm
+log_file_path = snakemake.log[0]
 
 final_df = pd.DataFrame()
 cycle = 1
 sample_list = []
 
-for q in snakemake.input.quant:
+with open(log_file_path, 'w') as log_file:
+    log_file.write("Starting merge process\n")
 
-    data = pd.read_csv(q, sep='\t', usecols=['target_id','tpm'])
+    log_file.write(f"Reading GTF file from {gtf}\n")
+    df_gtf = read_gtf(gtf)
+    protein_coding_genes = set(df_gtf[df_gtf['gene_biotype'] == 'protein_coding']['gene_id'].dropna().unique())
+    protein_coding_transcripts = set(df_gtf[df_gtf['gene_id'].isin(protein_coding_genes)]['transcript_id'].dropna().unique())
+    log_file.write(f"Number of protein coding transcripts (based on gene_biotype): {len(protein_coding_transcripts)}\n")
 
-    # get sample name
-    sample = os.path.basename(os.path.dirname(q))
+    for q in snakemake.input.quant:
+        log_file.write(f"Processing file: {q}\n")
+        
+        data = pd.read_csv(q, sep='\t', usecols=['target_id', 'tpm'])
+        log_file.write(f"Read {data.shape[0]} rows from {q}\n")
 
-    # reformat dataframe
-    data.set_index('target_id', inplace=True)
-    data.rename(columns={"tpm":sample}, inplace=True)
+        data = data[data['target_id'].isin(protein_coding_transcripts)]
+        log_file.write(f"Filtered {data.shape[0]} rows to protein-coding transcripts\n")
 
-    # Merge dataframes
-    if cycle == 1:
-        final_df = data
-    else:
-        final_df = pd.merge(final_df, data, left_index=True, right_index=True)
-    
-    sample_list += [sample]
-    cycle+=1
+        sample = os.path.basename(os.path.dirname(q))
 
-# transcript ID --> gene ID
-ids = pd.read_csv(tx2gene, sep='\t', names=['transcript','gene'])
-ids.set_index('transcript', inplace=True, drop=False)
+        data.set_index('target_id', inplace=True)
+        data.rename(columns={"tpm": sample}, inplace=True)
 
-final_df = pd.merge(final_df, ids, left_index=True, right_index=True)
-final_df.set_index('gene', inplace=True)
+        if cycle == 1:
+            final_df = data
+        else:
+            final_df = pd.merge(final_df, data, left_index=True, right_index=True, how='outer')
 
-# Filter genes by TPM
-# TPM >=1 in at least one sample
-filtered = final_df[~((final_df[sample_list]<1).all(axis=1))]
+        sample_list += [sample]
+        cycle += 1
 
-# Filter genes by biotype
-# only keep protein coding genes
-df_gtf = read_gtf(gtf)
-filtered_pc = filtered[filtered.index.isin(df_gtf.gene_id)]
+        log_file.write(f"Final dataframe shape after merging {sample}: {final_df.shape}\n")
 
-# Add gene name
-id_name = df_gtf[['gene_id','gene_name']].drop_duplicates(ignore_index=True)
+    log_file.write(f"Reading transcript to gene ID mapping from {tx2gene}\n")
+    ids = pd.read_csv(tx2gene, sep='\t', names=['transcript', 'gene'])
+    ids.set_index('transcript', inplace=True, drop=False)
 
-index = filtered_pc.index.tolist()
-names =[]
+    final_df = pd.merge(final_df, ids, left_index=True, right_index=True, how='left')
+    final_df.set_index('gene', inplace=True)
+    log_file.write(f"Final dataframe shape after adding gene IDs: {final_df.shape}\n")
 
-for i in range(len(index)):
-    id = index[i]
-    name = id_name[id_name['gene_id']==id].iloc[0]['gene_name']
-    names.append(name)
+    # Skipping TPM filtering to keep all rows
+    log_file.write("Skipping TPM filtering\n")
+    filtered = final_df
+    log_file.write(f"Dataframe shape without TPM filtering: {filtered.shape}\n")
 
-print(names)
-filtered_pc['gene_name'] = names
-cols = filtered_pc.columns.tolist()
-cols = cols[-1:] + cols[:-1]
-cols = cols[-1:] + cols[:-1]
-filtered_pc = filtered_pc[cols]
+    id_name = df_gtf[['gene_id', 'gene_name']].drop_duplicates(ignore_index=True)
 
-# Write to file
-filtered_pc.to_csv(outfile, sep='\t')
+    index = filtered.index.tolist()
+    names = []
+
+    for i in range(len(index)):
+        id = index[i]
+        if id in id_name['gene_id'].values:
+            name = id_name[id_name['gene_id'] == id].iloc[0]['gene_name']
+        else:
+            name = "Unknown"
+        names.append(name)
+
+    log_file.write("Adding gene names\n")
+    filtered['gene_name'] = names
+    cols = filtered.columns.tolist()
+    cols = cols[-1:] + cols[:-1]
+    filtered = filtered[cols]
+
+    log_file.write("Writing final output file\n")
+    filtered.to_csv(outfile, sep='\t')
+    log_file.write("Merge process completed successfully\n")

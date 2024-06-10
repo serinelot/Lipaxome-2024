@@ -1,10 +1,12 @@
 .snakemake/
 workflow/.snakemake/
 workflow/Log.out
-workflow/data/qc/
-workflow/data/trimmed/
-workflow/data/qc_trimmed/
+workflow/data/fastp/
 workflow/data/fastq/
+workflow/data/qc/
+workflow/data/qc_fastp/
+workflow/data/qc_trimmomatic/
+workflow/data/trimmomatic/
 workflow/data/comparisons.tsv
 workflow/data/design.tsv
 workflow/data/references/Homo_sapiens_GRCh38_110.protein_coding.gtf

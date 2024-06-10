@@ -112,7 +112,8 @@ rule filter_rmats:
         tpm = rules.merge_kallisto_quant.output.tpm,
         gtf = rules.download_human_gtf.output.gtf,
         fdr = 0.05,
-        deltapsi = 0.10
+        deltapsi = 0.10,
+        min_tpm = 0.75
     conda:
         "../envs/python.yml"
     log:
