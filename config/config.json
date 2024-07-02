@@ -6,8 +6,8 @@ path:
   coco_git_link: "https://github.com/scottgroup/coco.git"
 
 download:
-  human_gtf: "http://ftp.ensembl.org/pub/release-112/gtf/homo_sapiens/Homo_sapiens.GRCh38.112.gtf.gz"
-  human_genome_fa: "http://ftp.ensembl.org/pub/release-112/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz"
-  human_gff3: "http://ftp.ensembl.org/pub/release-112/gff3/homo_sapiens/Homo_sapiens.GRCh38.112.gff3.gz"
+  human_gtf: "data/references/gtf/Homo_sapiens.GRCh38.110_snoRNAs_tRNAs.gtf"
+  human_genome_fa: "http://ftp.ensembl.org/pub/release-110/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz"
+  human_gff3: "http://ftp.ensembl.org/pub/release-110/gff3/homo_sapiens/Homo_sapiens.GRCh38.110.gff3.gz"
   go_basic_obo: "http://purl.obolibrary.org/obo/go/go-basic.obo"
   go_annotation_gaf: "http://geneontology.org/gene-associations/goa_human_rna.gaf.gz"

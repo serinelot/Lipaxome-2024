@@ -12,16 +12,16 @@
 #         "touch geo_download.txt"
 
 
-rule download_human_gtf:
-    """ Download gtf of human genome from Ensembl """
-    output:
-        gtf = 'data/references/gtf/homo_sapiens.gtf'
-    params:
-        link = config['download']['human_gtf']
-    shell:
-        "wget -O temp.gz {params.link} && "
-        "gunzip temp.gz && "
-        "mv temp {output.gtf}"
+# rule download_human_gtf:
+#     """ Download gtf of human genome from Ensembl """
+#     output:
+#         gtf = 'data/references/gtf/homo_sapiens.gtf'
+#     params:
+#         link = config['download']['human_gtf']
+#     shell:
+#         "wget -O temp.gz {params.link} && "
+#         "gunzip temp.gz && "
+#         "mv temp {output.gtf}"
 
 
 rule download_human_gff3:
@@ -76,24 +76,24 @@ rule download_coco_git:
         '&& git clone {params.git_coco_link} {output.git_coco_folder}'
 
 
-# rule go_basic_obo:
-#     """ Download go-basic.obo file from Gene Ontology """
-#     output:
-#         go_obo = 'data/references/GO/go-basic.obo'
-#     params:
-#         link = config['download']['go_basic_obo']
-#     shell:
-#         "wget -O temp {params.link} && "
-#         "mv temp {output.go_obo}"
+rule go_basic_obo:
+    """ Download go-basic.obo file from Gene Ontology """
+    output:
+        go_obo = 'data/references/GO/go-basic.obo'
+    params:
+        link = config['download']['go_basic_obo']
+    shell:
+        "wget -O temp {params.link} && "
+        "mv temp {output.go_obo}"
 
 
-# rule go_annotation_gaf:
-#     """ Download goa_human_rna.gaf file from Gene Ontology """
-#     output:
-#         go_gaf = 'data/references/GO/goa_human_rna.gaf'
-#     params:
-#         link = config['download']['go_annotation_gaf']
-#     shell:
-#         "wget -O temp.gz {params.link} && "
-#         "gunzip temp.gz && "
-#         "mv temp {output.go_gaf}"
+rule go_annotation_gaf:
+    """ Download goa_human_rna.gaf file from Gene Ontology """
+    output:
+        go_gaf = 'data/references/GO/goa_human_rna.gaf'
+    params:
+        link = config['download']['go_annotation_gaf']
+    shell:
+        "wget -O temp.gz {params.link} && "
+        "gunzip temp.gz && "
+        "mv temp {output.go_gaf}"

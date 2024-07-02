@@ -57,6 +57,26 @@ rule merge_coco_cc_output:
         "../scripts/merge_coco_cc_output.py"
 
 
+rule deseq2_coco_mRNA:
+    input:
+        quant = expand("results/tgirt/coco_cc/{id}.tsv", id=id_list),
+        samples = "data/design.tsv",
+        comparisons = "data/comparisons.tsv",
+        gene_id = "data/references/tx2gene.tsv"
+    output:
+        results = directory("results/dge/deseq2_coco_mRNA"),
+        out_files = expand('results/dge/deseq2_coco_mRNA/{comp}.csv', comp = comparisons)
+    params:
+        quant_dir = "results/tgirt/coco_cc",
+        filter_count_threshold = 10
+    log:
+        "logs/deseq2_coco_mRNA.log"
+    message:
+        "Perform differential expression analysis for various conditions."
+    script:
+        "../scripts/DESeq2_coco_tximport_mrna.R"
+
+
 
 # rule coco_cb:
 #     """ Create a bedgraph from the bam files """

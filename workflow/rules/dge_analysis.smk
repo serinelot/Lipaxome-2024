@@ -1,7 +1,7 @@
 rule build_transcriptome:
     input:
         genome = rules.download_human_genome.output.genome,
-        gtf = rules.download_human_gtf.output.gtf   
+        gtf = config['download']['human_gtf']   
     output:
         config["path"]["transcriptome"]
     conda:
@@ -66,7 +66,7 @@ rule kallisto_quant:
 
 rule tx2gene:
     input:
-        gtf = rules.download_human_gtf.output.gtf
+        gtf = config['download']['human_gtf']
     output:
         tsv = "data/references/tx2gene.tsv"
     conda:
@@ -79,9 +79,9 @@ rule tx2gene:
 
 rule filter_gtf_pc_genes:
     input:
-        gtf = rules.download_human_gtf.output.gtf
+        gtf = config['download']['human_gtf']
     output:
-        pc_gtf = "data/references/gtf/homo_sapiens.protein_coding.gtf"
+        pc_gtf = "data/references/gtf/Homo_sapiens.GRCh38.110_snoRNAs_tRNAs.protein_coding.gtf"
     log:
         "logs/kallisto/filter_gtf_pc_genes.log"
     message:
@@ -127,28 +127,48 @@ rule deseq2_mRNA:
         comparisons = "data/comparisons.tsv",
         gene_id = "data/references/tx2gene.tsv"
     output:
-        results = directory("results/dge/deseq2_mRNA"),
-        out_files = expand('results/dge/deseq2_mRNA/{comp}.csv', comp = comparisons)
+        results = directory("results/dge/deseq2_kallisto_mRNA"),
+        out_files = expand('results/dge/deseq2_kallisto_mRNA/{comp}.csv', comp = comparisons)
     params:
-        kallisto_dir = "results/dge/kallisto"
+        kallisto_dir = "results/dge/kallisto",
+        filter_count_threshold = 10
     log:
         "logs/deseq2_mRNA.log"
     message:
         "Perform differential expression analysis for various conditions."
     script:
-        "../scripts/DESeq2_kallisto_tximport.R"
+        "../scripts/DESeq2_kallisto_tximport_mrna.R"
 
+
+rule deseq2_mRNA_transcript:
+    input:
+        quant = expand("results/dge/kallisto/{id}/abundance.tsv", id=id_list),
+        samples = "data/design.tsv",
+        comparisons = "data/comparisons.tsv",
+        gene_id = "data/references/tx2gene.tsv"
+    output:
+        results = directory("results/dge/deseq2_kallisto_mRNA_transcript"),
+        out_files = expand('results/dge/deseq2_kallisto_mRNA_transcript/{comp}.csv', comp = comparisons)
+    params:
+        kallisto_dir = "results/dge/kallisto",
+        filter_count_threshold = 10
+    log:
+        "logs/deseq2_mRNA_trancript.log"
+    message:
+        "Perform differential expression analysis for various conditions."
+    script:
+        "../scripts/DESeq2_kallisto_tximport_mrna_transcript.R"
 
 # rule volcano_plot:
 #     input:
 #         DE_outdir = rules.deseq2.output.results,
-#         DE_output = "results/dge/deseq2/{comp}.csv",
+#         DE_output = "results/dge/deseq2_kallisto_mRNA/{comp}.csv",
 #         filtered_genes = rules.merge_kallisto_quant.output.tpm,
 #         gtf = rules.filter_gtf_pc_genes.output.pc_gtf
 #     output:
-#         volcano = "results/dge/volcano_plot/{comp}.svg",
-#         up_genes = "results/dge/volcano_plot/{comp}_sig_diffexp_genes_up.tsv",
-#         down_genes = "results/dge/volcano_plot/{comp}_sig_diffexp_genes_down.tsv"
+#         volcano = "results/dge/volcano_plot/deseq2_kallisto_mrna_{comp}.svg",
+#         up_genes = "results/dge/volcano_plot/deseq2_kallisto_mrna_{comp}_up_genes.tsv",
+#         down_genes = "results/dge/volcano_plot/deseq2_kallisto_mrna_{comp}_down_genes.tsv"
 #     params:
 #         pval_threshold = 0.05
 #     log:

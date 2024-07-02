@@ -82,7 +82,7 @@ rule run_rmats:
         bam = expand(rules.primary_alignments.output, id = id_list),
         group1 = "results/splicing/rmats/fxs_bam_list.txt",
         group2 = "results/splicing/rmats/control_bam_list.txt",
-        gtf = rules.download_human_gtf.output.gtf
+        gtf = config['download']['human_gtf']
     output:
         outdir = directory("results/splicing/rmats/{comp}/raw"),
         tmpdir = directory("results/splicing/rmats/{comp}/tmp"),
@@ -110,7 +110,7 @@ rule filter_rmats:
     params:
         dir = directory("results/splicing/rmats/{comp}"),
         tpm = rules.merge_kallisto_quant.output.tpm,
-        gtf = rules.download_human_gtf.output.gtf,
+        gtf = config['download']['human_gtf'],
         fdr = 0.05,
         deltapsi = 0.10,
         min_tpm = 0.75

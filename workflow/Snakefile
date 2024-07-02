@@ -28,7 +28,7 @@ conditions = df_cond['condition'].unique().tolist()
 include: "rules/download_all.smk"
 include: "rules/common_seq.smk"
 include: "rules/dge_analysis.smk"
-#include: "rules/tgirt_seq.smk"
+include: "rules/tgirt_seq.smk"
 #include: "rules/functions.smk"
 include: "rules/splicing.smk"
 
@@ -37,9 +37,7 @@ rule all:
     input:
         qc_fq1_out = expand("data/qc/{id}_1_fastqc.html", id = id_list),
         fastq1 = expand("data/fastp/{id}_1.fastq.gz", id = id_list),
-        trimm_fq2 = expand("data/trimmomatic/{id}_2.fastq.gz", id = id_list),
         qc_trimm_fq1_out = expand("data/qc_fastp/{id}_1_fastqc.html", id = id_list),
-        qc_trimm_fq2_out = expand("data/qc_trimmomatic/{id}_2_fastqc.html", id = id_list),
         chrNameLength = config['path']['chrNameLength'],
         bam = expand("results/STAR/{id}/Aligned.sortedByCoord.out.bam", id = id_list)
 
@@ -47,13 +45,13 @@ rule all:
 rule all_downloads:
     input:
         #fake_output_fastq = expand('data/references/geo_download.txt')
-        gtf = 'data/references/gtf/homo_sapiens.gtf',
+        # gtf = 'data/references/gtf/homo_sapiens.gtf',
         gff3 = 'data/references/gff3/homo_sapiens.gff3',
-        genome = 'data/references/genome_fa/homo_sapiens_genome.fa'
-        # coco_dependency_download = "scripts/pairedBamToBed12/",
-        # coco_git = 'git_repos/coco',
-        # go_obo = 'data/references/GO/go-basic.obo',
-        # go_gaf = 'data/references/GO/goa_human_rna.gaf'
+        genome = 'data/references/genome_fa/homo_sapiens_genome.fa',
+        #coco_dependency_download = "scripts/pairedBamToBed12/",
+        coco_git = 'git_repos/coco',
+        go_obo = 'data/references/GO/go-basic.obo',
+        go_gaf = 'data/references/GO/goa_human_rna.gaf'
 
 
 rule dge:
@@ -62,17 +60,19 @@ rule dge:
         kallisto_index = "data/references/kallisto.idx",
         kallisto_quant = expand("results/dge/kallisto/{id}/abundance.tsv", id = id_list),
         tx2gene = "data/references/tx2gene.tsv",
-        filter_gtf_pc_genes = "data/references/gtf/homo_sapiens.protein_coding.gtf",
+        filter_gtf_pc_genes = "data/references/gtf/Homo_sapiens.GRCh38.110_snoRNAs_tRNAs.protein_coding.gtf",
         merge_kallisto_quant = "results/dge/kallisto/tpm.tsv",
-        deseq2_mRNA = expand('results/dge/deseq2_mRNA/{comp}.csv', comp = comparisons)
-#         #volcano = expand("results/dge/volcano_plot/{comp}.svg", comp = comparisons)
+        deseq2_mRNA = expand('results/dge/deseq2_kallisto_mRNA/{comp}.csv', comp = comparisons),
+        deseq2_mRNA_transcript = expand('results/dge/deseq2_kallisto_mRNA_transcript/{comp}.csv', comp = comparisons)
+#         volcano = "results/dge/volcano_plot/deseq2_kallisto_mrna_{comp}.svg"
 #         #GO_analysis_upregulated_genes = expand("results/dge/GO/GO_{comp}_upregulated_genes.svg", comp = comparisons) #BESOIN D'INTERNET: PROFIL LOCAL
 
-# rule tgirt:
-#     input:
-#         gtf_corrected = "data/references/gtf/hg38_Ensembl_V101_Scottlab_2020_correct_annotation.gtf",
-#         coco_cc = expand("results/tgirt/coco_cc/{id}.tsv", id = id_list),
-#         merged_counts = "results/tgirt/coco_cc/merged_counts.tsv"
+rule tgirt:
+    input:
+        gtf_corrected = "data/references/gtf/hg38_Ensembl_V101_Scottlab_2020_correct_annotation.gtf",
+        coco_cc = expand("results/tgirt/coco_cc/{id}.tsv", id = id_list),
+        merged_counts = "results/tgirt/coco_cc/merged_counts.tsv",
+        deseq2_coco_mRNA = expand('results/dge/deseq2_coco_mRNA/{comp}.csv', comp = comparisons)
 #          unsorted_bedgraph = expand("results/tgirt/coco_cb/{id}_unsorted.bedgraph", id = id_list),
 #          sorted_bedgraph = expand("results/tgirt/coco_cb/{id}.bedgraph", id = id_list)
 
