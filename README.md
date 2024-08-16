@@ -1,6 +1,6 @@
 # Lipaxome-2024
 
-__Auteur__ : Sérine Benachenhou
+__Auteur__ : Sérine Benachenhou Pilou
 
 __Adresse Courriel__ :  _<bens3307@usherbrooke.ca>_
 
