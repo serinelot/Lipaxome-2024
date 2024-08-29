@@ -1,15 +1,15 @@
-# rule download_human_sample_fastq:
-#     """Téléchargement des données de RNA-Seq du projet Lipaxome"""
-#     output:
-#         "data/references/geo_download.txt"
-#     params:
-#         sample_list = "data/references/sra_id_wget.txt"
-#     shell:
-#         "mkdir -p data/fastq/ && "
-#         "cd data/fastq/ && "
-#         "wget -i ../references/sra_id_wget.txt && "
-#         "cd ../references/ && "
-#         "touch geo_download.txt"
+rule download_human_sample_fastq:
+    """Téléchargement des données de RNA-Seq du projet Lipaxome"""
+    output:
+        "data/references/geo_download.txt"
+    params:
+        sample_list = "data/references/sra_id_wget.txt"
+    shell:
+        "mkdir -p data/fastq/ && "
+        "cd data/fastq/ && "
+        "wget -i ../references/sra_id_wget.txt && "
+        "cd ../references/ && "
+        "touch geo_download.txt"
 
 
 # rule download_human_gtf:

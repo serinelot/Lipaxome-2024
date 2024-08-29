@@ -30,7 +30,7 @@ qc_trimmomatic:
 qc_fastp:
     cpus-per-task: 6
     mem: 2G
-    time: 0-0:30:00
+    time: 0-1:00:00
 
 star_index:
     cpus-per-task: 32
@@ -56,6 +56,16 @@ merge_coco_cc_output:
     cpus-per-task: 2
     mem: 4G
     time: 0-1:00:00
+
+calculate_biotype_proportions:
+    cpus-per-task: 1
+    mem: 1G
+    time: 0-0:05:00
+
+merge_biotype_frequencies:
+    cpus-per-task: 1
+    mem: 1G
+    time: 0-0:05:00
 
 coco_cb:
     cpus-per-task: 16

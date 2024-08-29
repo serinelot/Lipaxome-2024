@@ -140,6 +140,22 @@ rule deseq2_mRNA:
         "../scripts/DESeq2_kallisto_tximport_mrna.R"
 
 
+rule deseq2_stat:
+    input:
+        deseq2 = rules.deseq2_mRNA.output.out_files
+    output:
+        deseq2_stat = expand('results/dge/deseq2_kallisto_mRNA/{comp}_deseq2_stat.csv', comp = comparisons), 
+        volcano_plot_total = expand('results/dge/deseq2_kallisto_mRNA/{comp}_volcano_plot_total.png', comp = comparisons),
+        volcano_plot_zoom = expand('results/dge/deseq2_kallisto_mRNA/{comp}_volcano_plot_zoom.png', comp = comparisons),
+        go_enrichment_total = expand('results/dge/deseq2_kallisto_mRNA/{comp}_go_enrichment_total.png', comp = comparisons),
+        go_enrichment_up = expand('results/dge/deseq2_kallisto_mRNA/{comp}_go_enrichment_up.png', comp = comparisons),
+        go_enrichment_down = expand('results/dge/deseq2_kallisto_mRNA/{comp}_go_enrichment_down.png', comp = comparisons)
+    log:
+        "logs/deseq2_mRNA_stat.log"
+    script:
+        "../scripts/deseq2_stat_kallisto_mRNA.R"
+
+
 rule deseq2_mRNA_transcript:
     input:
         quant = expand("results/dge/kallisto/{id}/abundance.tsv", id=id_list),

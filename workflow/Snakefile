@@ -44,7 +44,7 @@ rule all:
 
 rule all_downloads:
     input:
-        #fake_output_fastq = expand('data/references/geo_download.txt')
+        fake_output_fastq = expand('data/references/geo_download.txt'),
         # gtf = 'data/references/gtf/homo_sapiens.gtf',
         gff3 = 'data/references/gff3/homo_sapiens.gff3',
         genome = 'data/references/genome_fa/homo_sapiens_genome.fa',
@@ -63,16 +63,20 @@ rule dge:
         filter_gtf_pc_genes = "data/references/gtf/Homo_sapiens.GRCh38.110_snoRNAs_tRNAs.protein_coding.gtf",
         merge_kallisto_quant = "results/dge/kallisto/tpm.tsv",
         deseq2_mRNA = expand('results/dge/deseq2_kallisto_mRNA/{comp}.csv', comp = comparisons),
-        deseq2_mRNA_transcript = expand('results/dge/deseq2_kallisto_mRNA_transcript/{comp}.csv', comp = comparisons)
+        deseq2_mRNA_transcript = expand('results/dge/deseq2_kallisto_mRNA_transcript/{comp}.csv', comp = comparisons),
+        deseq2_stat = expand('results/dge/deseq2_kallisto_mRNA/{comp}_deseq2_stat.csv', comp = comparisons) #LOCAL
 #         volcano = "results/dge/volcano_plot/deseq2_kallisto_mrna_{comp}.svg"
 #         #GO_analysis_upregulated_genes = expand("results/dge/GO/GO_{comp}_upregulated_genes.svg", comp = comparisons) #BESOIN D'INTERNET: PROFIL LOCAL
 
 rule tgirt:
     input:
-        gtf_corrected = "data/references/gtf/hg38_Ensembl_V101_Scottlab_2020_correct_annotation.gtf",
+        gtf_corrected = "data/references/gtf/Homo_sapiens.GRCh38.110_snoRNAs_tRNAs_correct_annotation.gtf",
         coco_cc = expand("results/tgirt/coco_cc/{id}.tsv", id = id_list),
         merged_counts = "results/tgirt/coco_cc/merged_counts.tsv",
-        deseq2_coco_mRNA = expand('results/dge/deseq2_coco_mRNA/{comp}.csv', comp = comparisons)
+        deseq2_coco_mRNA = expand('results/dge/deseq2_coco_mRNA/{comp}.csv', comp = comparisons),
+        counts_with_biotypes = expand("results/tgirt/rna_biotype/{id}_coco_counts_with_biotypes.tsv", id = id_list),
+        biotype_proportions = expand("results/tgirt/rna_biotype/{id}_biotype_proportions.tsv", id = id_list),
+        merged_frequencies = "results/tgirt/rna_biotype/merged_biotype_frequencies.tsv"
 #          unsorted_bedgraph = expand("results/tgirt/coco_cb/{id}_unsorted.bedgraph", id = id_list),
 #          sorted_bedgraph = expand("results/tgirt/coco_cb/{id}.bedgraph", id = id_list)
 

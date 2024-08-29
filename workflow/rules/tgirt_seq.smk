@@ -4,7 +4,7 @@ rule coco_ca:
         gtf = config["download"]["human_gtf"],
         coco_dir = rules.download_coco_git.output.git_coco_folder
     output:
-        gtf_corrected = "data/references/gtf/hg38_Ensembl_V101_Scottlab_2020_correct_annotation.gtf"
+        gtf_corrected = "data/references/gtf/Homo_sapiens.GRCh38.110_snoRNAs_tRNAs_correct_annotation.gtf"
     conda:
         "../envs/coco.yml"
     shell:
@@ -77,6 +77,40 @@ rule deseq2_coco_mRNA:
         "../scripts/DESeq2_coco_tximport_mrna.R"
 
 
+rule add_biotypes_to_coco_counts:
+    """Add gene_name, transcript_biotype, and gene_biotype columns to a count file and merge with GTF file."""
+    input:
+        gtf = rules.coco_ca.output,
+        counts = rules.coco_cc.output
+    output:
+        counts_with_biotypes = "results/tgirt/rna_biotype/{id}_coco_counts_with_biotypes.tsv"
+    threads:
+        16
+    script:
+        "../scripts/add_biotypes_to_coco_counts.R"
+
+
+rule calculate_biotype_proportions:
+    """Calculate the proportions and abundances of different gene biotypes based on count data."""
+    input:
+        counts_with_biotypes = rules.add_biotypes_to_coco_counts.output
+    output:
+        biotype_proportions = "results/tgirt/rna_biotype/{id}_biotype_proportions.tsv"
+    script:
+        "../scripts/calculate_biotype_proportions.R"
+
+
+rule merge_biotype_frequencies:
+    """Merge perc_frequency from all biotype proportions into a single file."""
+    input:
+        biotype_files = expand("results/tgirt/rna_biotype/{id}_biotype_proportions.tsv", id= id_list)
+    output:
+        merged_frequencies = "results/tgirt/rna_biotype/merged_biotype_frequencies.tsv",
+        merged_abundance = "results/tgirt/rna_biotype/merged_biotype_abundance.tsv"
+    script:
+        "../scripts/merge_biotype_frequencies.R"
+
+        
 
 # rule coco_cb:
 #     """ Create a bedgraph from the bam files """
