@@ -140,7 +140,7 @@ rule deseq2_mRNA:
         "../scripts/DESeq2_kallisto_tximport_mrna.R"
 
 
-rule deseq2_stat:
+rule deseq2_mrna_stat:
     input:
         deseq2 = rules.deseq2_mRNA.output.out_files
     output:

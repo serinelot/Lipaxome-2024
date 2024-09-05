@@ -14,9 +14,9 @@ Ce pipeline permet d'analyser des données de séquençage à l'ARN (RNA-Seq) à
 - Modèle prédictif
 
 ## Versions des packages
-- `conda` : 23. 10. 0
-- `python` : 3. 12. 0
-- `mamba` : 1. 5. 3
+- `conda` : 23. 11. 0-2
+- `python` : 3. 12. 3
+- `mamba` : 1. 5. 8
 - `snakemake` : 7. 32. 4
 - `r-base` : 4. 3. 2
 
@@ -53,7 +53,7 @@ conda update conda
 
 ### Création de l'environnement
 
-Si vous voulez utilisez ce pipeline pour utiliser `deseq2` pour l'analyse d'expressions différentielles de gènes, il est compliqué pour Snakemake de créer un environnement virtuel `deseq2` pour faire ce type d'analyse.
+Si vous voulez utilisez ce pipeline pour utiliser `deseq2` pour l'analyse d'expressions différentielles de gènes, il est compliqué pour Snakemake de créer un environnement virtuel `R` pour faire ce type d'analyse.
 
 Pour y remédier, il faut créer un environnement local où télécharger les packages nécessaires pour lancer deseq2:
 
@@ -95,6 +95,10 @@ conda install -c pkgs/r r-stringr=1.5.0=r43h6115d3f_0
 - `r-xml2` (1.3.5)
 ```bash
 conda install -c conda-forge r-xml2=1.3.5=r43h1ad5fc0_0
+```
+- `libdeflate` (1.19)
+```bash
+conda install -c conda-forge libdeflate=1.19=hd590300_0
 ```
 
 - `r-tidyverse` (2.0.0)
@@ -182,6 +186,71 @@ conda install -c pkgs/r r-locfit=1.5_9.8=r43h76d94ec_0
 conda install -c bioconda bioconductor-deseq2=1.40.2=r43hf17093f_0    
 ```
 
+- `r-png` (0.1_8)
+```bash
+conda install -c conda-forge r-png=0.1_8=r43h81d01c5_1    
+```
+
+- `bioconductor-annotationdbi` (1.62.2)
+```bash
+conda install -c bioconda bioconductor-annotationdbi=1.62.2=r43hdfd78af_0
+```
+
+- `bioconductor-biomart` (2.56.1)
+```bash
+conda install -c bioconda bioconductor-biomart=2.56.1=r43hdfd78af_0
+```
+
+- `r-ggrepel` (0.9.5)
+```bash
+conda install -c conda-forge r-ggrepel=0.9.5=r43h0d4f4ea_1
+```
+
+- `r-dbi` (1.2.3)
+```bash
+conda install -c conda-forge r-dbi=1.2.3=r43hc72bb7e_1
+```
+
+- `bioconductor-org.hs.eg.db` (3.17.0)
+```bash
+conda install -c bioconda bioconductor-org.hs.eg.db=3.17.0=r43hdfd78af_0
+```
+
+- `r-igraph` (1.5.1)
+```bash
+conda install -c conda-forge r-igraph=1.5.1=r43hb147323_1
+```
+
+- `r-fastmatch` (1.1_4)
+```bash
+conda install -c conda-forge r-fastmatch=1.1_4=r43hb1dbf0f_1
+```
+
+- `bioconductor-dose` (3.26.1)
+```bash
+conda install -c bioconda bioconductor-dose=3.26.1=r43hdfd78af_0
+```
+
+- `r-downloader` (0.4)
+```bash
+conda install -c conda-forge r-downloader=0.4=r43hc72bb7e_1006
+```
+
+- `r-ggraph` (2.1.0)
+```bash
+conda install -c conda-forge r-ggraph=2.1.0=r43ha503ecb_2
+```
+
+- `bioconductor-enrichplot` (1.20.0)
+```bash
+conda install -c bioconda bioconductor-enrichplot=1.20.0=r43hdfd78af_0
+```
+
+- `bioconductor-clusterprofiler` (4.8.1)
+```bash
+conda install -c bioconda bioconductor-clusterprofiler=4.8.1=r43hdfd78af_0
+```
+
 ### Duplication de l'environnement
 
 Après avoir un environnement deseq2 fonctionnel, vous pouvez dupliquer cet environnement avec un nouveau nom pour y installer snakemake.
@@ -236,33 +305,40 @@ https://snakemake.readthedocs.io/en/stable/getting_started/installation.html
 
 ## 5- Éxecution du pipeline Snakemake
 
-Le pipeline doit être lancé à partir du répertoire **workflow**. 
+Le pipeline doit être lancé à partir du répertoire **workflow** dans l'environnement conda où vous avez installé `snakemake`. 
 
-Dans les récentes versions de Snakemake, vous pouvez vous créer 2 types de profil pour lancer le pipeline:
+Dans les récentes versions de Snakemake (à partir de 7), vous pouvez vous créer 2 types de profil pour lancer le pipeline:
 
 - **profile_local**: Si les nœuds du cluster n'ont pas accès à Internet, exécutez en premier lieu les tâches nécessitant Internet localement (i.e all downloads) depuis le répertoire du workflow avec : 
 
 ```bash
 # Lancer la section all_downloads du pipeline localement
 snakemake all_downloads --profile ../profile_local/ 
+```
 
+```bash
 # Lancer un workflow localement
 snakemake --profile ../profile_local/ 
 ```
 
-- **profile_slurm**: Pour lancer le pipeline sur un cluster Slurm, on peut utiliser la commande suivante pour exécuter (mettre en file d'attente) toutes les tâches à la fois à partir du répertoire de workflow. N'oubliez pas de changer l'adresse d'utilisateur de messagerie pour votre propre adresse e-mail dans cluster.yaml (dans le répertoire profile_slurm).
+- **profile_slurm**: Pour lancer le pipeline sur un cluster Slurm, on peut utiliser les commandes suivantes pour exécuter (mettre en file d'attente) toutes les tâches à la fois à partir du répertoire de workflow. N'oubliez pas de changer l'adresse d'utilisateur de messagerie pour votre propre adresse e-mail dans cluster.yaml (dans le répertoire profile_slurm).
 
 ```bash
 # Lancer un workflow sur un cluster (ou section all du Snakefile)
 snakemake --profile ../profile_slurm/
+```
 
+```bash
 # Lancer la section dge du pipeline sur un cluster
-# Assurez-vous d'être dans l'environnement smake_deseq2
 snakemake dge --profile ../profile_slurm/
+```
 
+```bash
 # Lancer la section tgirt du pipeline sur un cluster
 snakemake tgirt --profile ../profile_slurm/
+```
 
+```bash
 # Lancer la section splicing du pipeline sur un cluster
 snakemake splicing --profile ../profile_slurm/
 ```
