@@ -18,7 +18,8 @@ Ce pipeline permet d'analyser des données de séquençage à l'ARN (RNA-Seq) à
 - `python` : 3. 12. 3
 - `mamba` : 1. 5. 8
 - `snakemake` : 7. 32. 4
-- `r-base` : 4. 3. 2
+- `r-base` : 4. 3. 2  
+<br>
 
 ## 1- Installation du Miniconda
 Miniconda3 a besoin d'être installé (https://docs.conda.io/en/latest/miniconda.html)
@@ -46,209 +47,24 @@ La version du Conda proposée sur le site n'est pas nécessairement la version l
 **Pour vous assurer que Conda est à jour, exécutez :**
 ```bash
 conda update conda
-```
+```  
+<br>
 
 
-## 2- Installation de l'environnement DESeq2
+## 2- Installation de Mamba
 
-### Création de l'environnement
-
-Si vous voulez utilisez ce pipeline pour utiliser `deseq2` pour l'analyse d'expressions différentielles de gènes, il est compliqué pour Snakemake de créer un environnement virtuel `R` pour faire ce type d'analyse.
-
-Pour y remédier, il faut créer un environnement local où télécharger les packages nécessaires pour lancer deseq2:
+Mamba est un package disponible sur Conda qui permet de télécharger des packages plus rapidement que Conda. Il est conseillé d'utiliser `mamba` pour télécharger `snakemake`.
 
 ```bash
-conda create --name deseq2
+conda install -c conda-forge mamba
 ```
 
-Répondez `y` pour confirmer la location de l'environnement et activez l'environnement deseq2:
+## 3- Installation de l'environnement DESeq2
+
+DESeq2 est un outil utilisé pour évaluer l'expression différentielle des transcrits. Lancer le fichier deseq2.yml qui créera un nouvel environnement conda avec tous les outils nécessaires pour faire cette analyse:
 
 ```bash
-conda activate deseq2
-```
-
-### Installation des packages
-
-Ensuite, il faut télécharger les packages suivants dans l'environnement deseq2 (en tenant compte des versions des packages). Si vous avez des problèmes de compatibilités de versions, lisez dans le terminal les packages et les versions proposées pour régler le problèmes.
-
-Il est normal que quand vous lancez une installlation, plusieurs autres packages seront aussi installés. 
-
-**Assurez-vous que les packages installés sont compatibles avec la version de `r-base`.** Vous pouvez trouver toutes les versions d'un package en lançant un `conda search` nom_package.
-
-Voici les packages à installer **dans l'ordre**:
-
-- `r-base` (4.3.2)
-```bash
-conda install -c conda-forge r-base=4.3.2=h93585b2_0
-```
-
-- `r-readr` (2.1.4)
-```bash
-conda install -c pkgs/r r-readr=2.1.4=r43h884c59f_0
-```
-
-- `r-stringr` (1.5.0)
-```bash
-conda install -c pkgs/r r-stringr=1.5.0=r43h6115d3f_0
-```
-
-- `r-xml2` (1.3.5)
-```bash
-conda install -c conda-forge r-xml2=1.3.5=r43h1ad5fc0_0
-```
-- `libdeflate` (1.19)
-```bash
-conda install -c conda-forge libdeflate=1.19=hd590300_0
-```
-
-- `r-tidyverse` (2.0.0)
-```bash
-conda install -c pkgs/r r-tidyverse=2.0.0=r43h6115d3f_0
-```
-
-- `bioconductor-rhdf5` (2.44.0)
-```bash
-conda install -c bioconda bioconductor-rhdf5=2.44.0=r43hf17093f_1 
-```
-
-- `bioconductor-tximport` (1.28.0)
-```bash
-conda install -c bioconda bioconductor-tximport=1.28.0=r43hdfd78af_0
-```
-
-- `yq` (3.2.3)
-```bash
-conda install -c conda-forge yq=3.2.3=pyhd8ed1ab_0 
-```
-
-- `xmltodict` (0.13.0)
-```bash
-conda install -c pkgs/main xmltodict=0.13.0=py312h06a4308_0
-```
-
-- `bioconductor-data-packages` (20230718)
-```bash
-conda install -c bioconda bioconductor-data-packages=20230718
-```
-
-- `bioconductor-tximportdata` (1.28.0)
-```bash
-conda install -c bioconda bioconductor-tximportdata=1.28.0=r43hdfd78af_0
-```
-
-- `r-matrixstats` (1.0.0)
-```bash
-conda install -c pkgs/r r-matrixstats=1.0.0=r43h76d94ec_0
-```
-
-- `bioconductor-matrixgenerics` (1.12.2)
-```bash
-conda install -c bioconda bioconductor-matrixgenerics=1.12.2=r43hdfd78af_0
-```
-
-- `bioconductor-summarizedexperiment` (1.30.2)
-```bash
-conda install -c bioconda bioconductor-summarizedexperiment=1.30.2=r43hdfd78af_0
-```
-
-- `r-lambda.r` (1.2.4)
-```bash
-conda install -c pkgs/r r-lambda.r=1.2.4=r43h142f84f_0 
-```
-
-- `r-futile.logger` (1.4.3)
-```bash
-conda install -c pkgs/r r-futile.logger=1.4.3=r43h6115d3f_0
-```
-
-- `r-bh` (1.81.0_1)
-```bash
-conda install -c pkgs/r r-bh=1.81.0_1=r43h6115d3f_0  
-```
-
-- `r-snow` (0.4_4)
-```bash
-conda install -c pkgs/r r-snow=0.4_4=r43h142f84f_0  
-```
-
-- `bioconductor-biocparallel` (1.34.2)
-```bash
-conda install -c bioconda bioconductor-biocparallel=1.34.2=r43hf17093f_0   
-```
-
-- `r-locfit` (1.5_9.8)
-```bash
-conda install -c pkgs/r r-locfit=1.5_9.8=r43h76d94ec_0   
-```
-
-- `bioconductor-deseq2` (1.40.2)
-```bash
-conda install -c bioconda bioconductor-deseq2=1.40.2=r43hf17093f_0    
-```
-
-- `r-png` (0.1_8)
-```bash
-conda install -c conda-forge r-png=0.1_8=r43h81d01c5_1    
-```
-
-- `bioconductor-annotationdbi` (1.62.2)
-```bash
-conda install -c bioconda bioconductor-annotationdbi=1.62.2=r43hdfd78af_0
-```
-
-- `bioconductor-biomart` (2.56.1)
-```bash
-conda install -c bioconda bioconductor-biomart=2.56.1=r43hdfd78af_0
-```
-
-- `r-ggrepel` (0.9.5)
-```bash
-conda install -c conda-forge r-ggrepel=0.9.5=r43h0d4f4ea_1
-```
-
-- `r-dbi` (1.2.3)
-```bash
-conda install -c conda-forge r-dbi=1.2.3=r43hc72bb7e_1
-```
-
-- `bioconductor-org.hs.eg.db` (3.17.0)
-```bash
-conda install -c bioconda bioconductor-org.hs.eg.db=3.17.0=r43hdfd78af_0
-```
-
-- `r-igraph` (1.5.1)
-```bash
-conda install -c conda-forge r-igraph=1.5.1=r43hb147323_1
-```
-
-- `r-fastmatch` (1.1_4)
-```bash
-conda install -c conda-forge r-fastmatch=1.1_4=r43hb1dbf0f_1
-```
-
-- `bioconductor-dose` (3.26.1)
-```bash
-conda install -c bioconda bioconductor-dose=3.26.1=r43hdfd78af_0
-```
-
-- `r-downloader` (0.4)
-```bash
-conda install -c conda-forge r-downloader=0.4=r43hc72bb7e_1006
-```
-
-- `r-ggraph` (2.1.0)
-```bash
-conda install -c conda-forge r-ggraph=2.1.0=r43ha503ecb_2
-```
-
-- `bioconductor-enrichplot` (1.20.0)
-```bash
-conda install -c bioconda bioconductor-enrichplot=1.20.0=r43hdfd78af_0
-```
-
-- `bioconductor-clusterprofiler` (4.8.1)
-```bash
-conda install -c bioconda bioconductor-clusterprofiler=4.8.1=r43hdfd78af_0
+mamba env create -f deseq2.yml
 ```
 
 ### Duplication de l'environnement
@@ -262,46 +78,25 @@ Vous devriez avoir au final 3 environnements conda:
 
 - base
 - deseq2
-- smake_deseq2
+- smake_deseq2  
+<br>
 
-## 3- Installation de Mamba
-
-Mamba est un package disponible sur Conda qui permet de télécharger des packages plus rapidement que Conda. Il est conseillé d'utiliser `mamba` pour télécharger `snakemake`.
-
-### Dans l'environnement smake_deseq2
-
-```bash
-conda install -c conda-forge mamba
-```
-
-### Dans l'environnement base
-
-```bash
-conda install -n base -c conda-forge mamba
-```
 
 ## 4- Installation de Snakemake
 
 ### Dans l'environnement smake_deseq2
 
 ```bash
-# Télécharger snakemake via mamba
-mamba install -c conda-forge -c bioconda snakemake
-```
-
-### Dans l'environnement base
-
-Il faut créer un nouveau environnement sur Conda et télécharger `snakemake` dans cet environnement. 
-
-```bash
-# Télécharger snakemake via mamba
-mamba create -c conda-forge -c bioconda -n smake snakemake 
+mamba install -c conda-forge -c bioconda snakemake=7.32.4
 ```
 
 ### Si vous n'avez pas réussi à télécharger `mamba`:
 
-Vous pouvez aller sur le site de Snakemake pour voir les autres options de téléchargement de `snakemake`:
-https://snakemake.readthedocs.io/en/stable/getting_started/installation.html
+```bash
+conda install -c conda-forge -c bioconda snakemake=7.32.4
+```  
+<br>
+
 
 ## 5- Éxecution du pipeline Snakemake
 
