@@ -25,68 +25,99 @@ comparisons = comp_str
 df_cond = pd.read_csv('data/design.tsv', sep='\t', usecols=['sample','condition'])
 conditions = df_cond['condition'].unique().tolist()
 
-include: "rules/download_all.smk"
-include: "rules/common_seq.smk"
-include: "rules/dge_analysis.smk"
-#include: "rules/tgirt_seq.smk"
-#include: "rules/functions.smk"
-include: "rules/splicing.smk"
+include: "rules/I_download.smk"
+include: "rules/II_fastq.smk"
+include: "rules/III_preprocess.smk"
+include: "rules/IV_align_star.smk"
+include: "rules/Va_quant_kallisto.smk"
+include: "rules/Vb_quant_coco.smk"
+include: "rules/VIa_dge_kallisto.smk"
+include: "rules/VIb_dge_coco.smk"
+include: "rules/VIc_dge_kallisto_vs_coco.smk"
+include: "rules/VII_splicing.smk"
+include: "rules/VIIIa_transcriptome_kallisto.smk"
 
 
-rule all:
+####################################### LOCAL ########################################
+rule I_download:                                                                     #
+    input:                                                                           #
+        download_human_genome = "data/references/genome_fa/homo_sapiens_genome.fa",  #
+        clone_coco = 'git_repos/coco',                                               #
+        tx2gene = "data/references/tx2gene.tsv"                                      #
+                                                                                     #
+rule II_fastq:                                                                       #
+    input:                                                                           #
+        fastq_download = "data/references/download_fastq.done",                      #
+        rename_fastq = "data/references/rename_fastq.done"                           #
+######################################################################################
+
+
+rule III_preprocess:
     input:
-        qc_fq1_out = expand("data/qc/{id}_1_fastqc.html", id = id_list),
-        fastq1 = expand("data/fastp/{id}_1.fastq.gz", id = id_list),
-        qc_trimm_fq1_out = expand("data/qc_fastp/{id}_1_fastqc.html", id = id_list),
-        chrNameLength = config['path']['chrNameLength'],
-        bam = expand("results/STAR/{id}/Aligned.sortedByCoord.out.bam", id = id_list)
+        qc_pre_trim = expand("results/qc/pre_trim/{id}_1_fastqc.html", id=id_list),
+        fastp_trim = expand("results/preprocess/fastp/{id}_1_trimmed.fastq.gz", id=id_list),
+        qc_post_trim = expand("results/qc/post_trim/{id}_1_trimmed_fastqc.html", id=id_list)
 
-
-rule all_downloads:
+rule IV_align_star:
     input:
-        fake_output_fastq = expand('data/references/geo_download.txt'),
-        gtf = 'data/references/gtf/Homo_sapiens.GRCh38.110_snoRNAs_tRNAs.gtf',
-        gff3 = 'data/references/gff3/homo_sapiens.gff3',
-        genome = 'data/references/genome_fa/homo_sapiens_genome.fa',
-        #coco_dependency_download = "scripts/pairedBamToBed12/",
-        coco_git = 'git_repos/coco',
-        go_obo = 'data/references/GO/go-basic.obo',
-        go_gaf = 'data/references/GO/goa_human_rna.gaf'
+        star_index = config["path"]["chrNameLength"],
+        star_alignReads = expand("results/alignment/star/{id}/Aligned.sortedByCoord.out.bam", id=id_list)
 
 
-rule dge:
+########################################## DGE kallisto #######################################################
+rule Va_quant_kallisto:
     input:
-        build_transcriptome = "data/references/transcriptome.fa",
-        kallisto_index = "data/references/kallisto.idx",
-        kallisto_quant = expand("results/dge/kallisto/{id}/abundance.tsv", id = id_list),
-        tx2gene = "data/references/tx2gene.tsv",
-        filter_gtf_pc_genes = "data/references/gtf/Homo_sapiens.GRCh38.110_snoRNAs_tRNAs.protein_coding.gtf",
-        merge_kallisto_quant = "results/dge/kallisto/tpm.tsv",
-        deseq2_mRNA = expand('results/dge/deseq2_kallisto_mRNA/{comp}.csv', comp = comparisons),
-        deseq2_mRNA_transcript = expand('results/dge/deseq2_kallisto_mRNA_transcript/{comp}.csv', comp = comparisons),
-        deseq2_mrna_stat = expand('results/dge/deseq2_kallisto_mRNA/{comp}_deseq2_stat.csv', comp = comparisons)
-# #         volcano = "results/dge/volcano_plot/deseq2_kallisto_mrna_{comp}.svg"
-# #         #GO_analysis_upregulated_genes = expand("results/dge/GO/GO_{comp}_upregulated_genes.svg", comp = comparisons) #BESOIN D'INTERNET: PROFIL LOCAL
+        build_transcriptome = config["path"]["transcriptome"],
+        build_kallisto_index = "data/references/kallisto.idx",
+        quant_kallisto = expand("results/quant/kallisto/{id}/abundance.tsv", id = id_list)
 
-# rule tgirt:
-#     input:
-#         gtf_corrected = "data/references/gtf/Homo_sapiens.GRCh38.110_snoRNAs_tRNAs_correct_annotation.gtf",
-#         coco_cc = expand("results/tgirt/coco_cc/{id}.tsv", id = id_list),
-#         merged_counts = "results/tgirt/coco_cc/merged_counts.tsv",
-#         deseq2_coco_mRNA = expand('results/dge/deseq2_coco_mRNA/{comp}.csv', comp = comparisons),
-#         counts_with_biotypes = expand("results/tgirt/rna_biotype/{id}_coco_counts_with_biotypes.tsv", id = id_list),
-#         biotype_proportions = expand("results/tgirt/rna_biotype/{id}_biotype_proportions.tsv", id = id_list),
-#         merged_frequencies = "results/tgirt/rna_biotype/merged_biotype_frequencies.tsv"
-#         # unsorted_bedgraph = expand("results/tgirt/coco_cb/{id}_unsorted.bedgraph", id = id_list),
-#         #sorted_bedgraph = expand("results/tgirt/coco_cb/{id}.bedgraph", id = id_list)
-
-
-rule splicing:
+rule VIa_dge_kallisto:
     input:
-        primary_alignments = expand("results/splicing/star/{id}/{id}_Aligned.sortedByCoord.out.primary.bam", id = id_list),
-        bam_index = expand("results/splicing/star/{id}/{id}_Aligned.sortedByCoord.out.primary.bam.bai", id = id_list),
-        split_bams_files = "scripts/split_bams_files.sh", #LOCAL
-        execute_split_bams_files = "results/splicing/star/split_bam_done.txt",
-        create_bam_lists_for_rmats = "results/splicing/rmats/control_bam_list.txt", #Local
-        run_rmats = expand("results/splicing/rmats/{comp}/raw/summary.txt", comp = comparisons),
-        filter_rmats = expand('results/splicing/rmats/{comp}/filtered/SE.tsv', comp = comparisons)
+        filter_protein_coding_gtf = "data/references/gtf/Homo_sapiens.GRCh38.110_protein_coding.gtf",
+        build_tx2gene_pc = "data/references/tx2gene_protein_coding.tsv",
+        dge_kallisto_protein_coding = expand('results/dge/kallisto_protein_coding/{comp}_DESeq2_gene.csv', comp = comparisons),
+        dge_kallisto_protein_coding_stats = expand("results/dge/kallisto_protein_coding/{comp}_deseq2_stats.csv", comp=comparisons)
+
+
+########################################## DGE Coco ############################################################
+rule Vb_quant_coco:
+    input:
+        coco_correct_annotation = "data/references/gtf/Homo_sapiens.GRCh38.110_snoRNAs_tRNAs_correct_annotation.gtf",
+        coco_quant = expand("results/quant/coco/{id}.tsv", id = id_list),
+        merge_coco_cc = "results/quant/coco_merged_counts.tsv"
+
+rule VIb_dge_coco:
+    input:
+        filter_protein_coding_gtf_coco = "data/references/gtf/Homo_sapiens.GRCh38.110_snoRNAs_tRNAs_correct_annotation_protein_coding.gtf",
+        build_tx2gene_pc_coco = "data/references/tx2gene_protein_coding_coco.tsv",
+        dge_coco_protein_coding = expand('results/dge/coco_protein_coding/{comp}_DESeq2_gene.csv', comp = comparisons),
+        dge_coco_protein_coding_stats = expand("results/dge/coco_protein_coding/{comp}_deseq2_stats.csv", comp=comparisons),
+        dge_go_enrichment = expand("results/dge/coco_protein_coding/go/{comp}_go_enrichment.csv", comp = comparisons)
+
+
+########################################## DGE kallisto vs Coco ############################################################
+rule VIc_dge_kallisto_vs_coco:
+    input:
+        deseq2_protein_coding_kallisto_vs_coco = expand("results/dge/kallisto_vs_coco/deseq2_protein_coding_kallisto_vs_coco_{comp}.csv", comp = comparisons)
+
+########################################## Splicing ############################################################
+rule VII_splicing:
+    input:
+        extract_primary_alignments= expand("results/splicing/star/{id}/{id}_Aligned.sortedByCoord.out.primary.bam", id = id_list),
+        index_primary_bam = expand("results/splicing/star/{id}/{id}_Aligned.sortedByCoord.out.primary.bam.bai", id = id_list),
+        coverage_bedgraph = expand("results/splicing/genomecov/{id}.bedgraph", id = id_list),
+        make_split_script = "scripts/split_bams_by_cond.sh",
+        run_split_script = "results/splicing/star/split_bam_done.txt",
+        list_bams_for_rmats = "results/splicing/rmats/fxs_bam_list.txt",
+        merge_kallisto_tpm = "results/quant/kallisto_merged_tpm.tsv",
+        rmats_original = expand("results/splicing/rmats/{comp}/raw/summary.txt", comp = comparisons),
+        rmats_coco = expand("results/splicing/rmats_coco/{comp}/raw/summary.txt", comp = comparisons),
+        filter_rmats_original = expand("results/splicing/rmats/{comp}/filtered/SE.tsv", comp = comparisons),
+        filter_rmats_coco = expand("results/splicing/rmats_coco/{comp}/filtered/SE.tsv", comp = comparisons)
+
+
+########################################## DGE transcriptome kallisto ############################################################
+rule VIIIa_transcriptome_kallisto:
+    input:
+        transcriptome_deseq2_kallisto= expand("results/transcriptome/kallisto/deseq2/{comp}_DESeq2_transcripts.csv", comp = comparisons),
+        transcriptome_stats_kallisto = expand("results/transcriptome/kallisto/deseq2/{comp}_transcriptome_stats.csv", comp = comparisons)

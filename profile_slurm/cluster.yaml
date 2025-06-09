@@ -1,148 +1,216 @@
 __default__:
-    job-name: "SM.{rule}"
+    job-name: "{rule}"
     nodes: 1
     cpus-per-task: 2
     mem: 4G
-    time: 0-0:30:00
+    time: 0-1:00:00
     mail-user: "bens3307@usherbrooke.ca"
     mail-type: FAIL
 
-trimmomatic:
-    cpus-per-task: 4
-    mem: 1G
-    time: 0-0:30:00
+qc_pre_trim:
+    job-name: "qc_pre_trim.{wildcards.id}"
+    cpus-per-task: 3
+    mem: 2G
+    time: 0-1:00:00
 
-fastp:
+fastp_trim:
+    job-name: "fastp_trim.{wildcards.id}"
     cpus-per-task: 4
     mem: 5G
-    time: 0-0:20:00
+    time: 0-2:00:00
 
-qc:
-    cpus-per-task: 6
+qc_post_trim:
+    job-name: "qc_post_trim.{wildcards.id}"
+    cpus-per-task: 3
     mem: 2G
-    time: 0-0:30:00
-
-qc_trimmomatic:
-    cpus-per-task: 6
-    mem: 2G
-    time: 0-0:30:00
-
-qc_fastp:
-    cpus-per-task: 6
-    mem: 2G
-    time: 0-1:30:00
+    time: 0-1:00:00
 
 star_index:
+    job-name: "star_index"
     cpus-per-task: 32
     mem: 70G
-    time: 0-0:45:00
+    time: 0-1:00:00
 
 star_alignReads:
+    job-name: "star_alignReads.{wildcards.id}"
     cpus-per-task: 32
     mem: 130G
-    time: 0-1:00:00
-
-coco_ca:
-    cpus-per-task: 1
-    mem: 8G
-    time: 0-0:30:00
-
-coco_cc:
-    cpus-per-task: 8
-    mem: 24G
-    time: 0-12:00:00
-
-merge_coco_cc_output:
-    cpus-per-task: 2
-    mem: 4G
-    time: 0-1:00:00
-
-calculate_biotype_proportions:
-    cpus-per-task: 1
-    mem: 1G
-    time: 0-0:05:00
-
-merge_biotype_frequencies:
-    cpus-per-task: 1
-    mem: 1G
-    time: 0-0:05:00
-
-coco_cb:
-    cpus-per-task: 16
-    mem: 60G
-    time: 0-10:00:00
-
-sort_bg:
-    cpus-per-task: 2
-    mem: 4G
-    time: 0-5:45:00
+    time: 0-2:00:00
 
 build_transcriptome:
     cpus-per-task: 2
     mem: 8G
     time: 0-1:00:00
 
-kallisto_index:
+build_kallisto_index:
     cpus-per-task: 16
     mem: 20G
-    time: 0-0:30:00
+    time: 0-1:00:00
 
-kallisto_quant:
+quant_kallisto:
+    job-name: "kallisto_quant.{wildcards.id}"
     cpus-per-task: 32
     mem: 60G
     time: 0-3:00:00
 
-tx2gene:
+filter_protein_coding_gtf:
+    job-name: "filter_protein_coding_gtf"
     cpus-per-task: 2
     mem: 2G
-    time: 0-0:30:00
+    time: 0-1:00:00
 
-filter_gtf_pc_genes:
+dge_kallisto_protein_coding:
+    job-name: "dge_kallisto_protein_coding"
+    cpus-per-task: 2
+    mem: 3G
+    time: 0-0:20:00
+
+dge_kallisto_protein_coding_stats:
+    job-name: "dge_kallisto_protein_coding_stats"
+    cpus-per-task: 2
+    mem: 3G
+    time: 0-0:20:00
+
+coco_correct_annotation:
+    job-name: "coco_correct_annotation"
+    cpus-per-task: 1
+    mem: 8G
+    time: 0-1:00:00
+
+coco_quant:
+    job-name: "coco_quant.{wildcards.id}"
+    cpus-per-task: 8
+    mem: 24G
+    time: 0-1:00:00
+
+filter_protein_coding_gtf_coco:
+    job-name: "filter_protein_coding_gtf_coco"
     cpus-per-task: 2
     mem: 2G
-    time: 0-0:30:00
+    time: 0-1:00:00
 
-merge_kallisto_quant:
+merge_coco_cc:
+    job-name: "merge_coco_cc"
     cpus-per-task: 4
     mem: 4G
-    time: 0-0:30:00
+    time: 0-1:00:00
 
-deseq2_mRNA:
-    cpus-per-task: 8
-    mem: 8G
-    time: 0-0:15:00
+dge_coco_protein_coding:
+    job-name: "dge_coco_protein_coding"
+    cpus-per-task: 2
+    mem: 3G
+    time: 0-0:20:00
 
-deseq2_mRNA_transcript:
-    cpus-per-task: 8
-    mem: 8G
-    time: 0-0:15:00
+dge_coco_protein_coding_stats:
+    job-name: "dge_coco_protein_coding_stats"
+    cpus-per-task: 2
+    mem: 3G
+    time: 0-0:20:00
 
-deseq2_coco_mRNA:
-    cpus-per-task: 8
-    mem: 8G
-    time: 0-0:15:00
+dge_go_enrichment:
+    job-name: "dge_go_enrichment"
+    cpus-per-task: 2
+    mem: 3G
+    time: 0-0:20:00
 
-primary_alignments:
+deseq2_protein_coding_kallisto_vs_coco:
+    job-name: "deseq2_protein_coding_kallisto_vs_coco"
+    cpus-per-task: 2
+    mem: 5G
+    time: 0-0:20:00
+
+enrich_kallisto_vs_coco_functiona:
+    job-name: "enrich_kallisto_vs_coco_functiona"
     cpus-per-task: 2
     mem: 4G
     time: 0-1:00:00
 
-bam_index:
+extract_primary_alignments:
+    job-name: "primary_alignments.{wildcards.id}"
     cpus-per-task: 2
+    mem: 8G
+    time: 0-0:20:00
+
+index_primary_bam:
+    job-name: "index_primary_bam.{wildcards.id}"
+    cpus-per-task: 2
+    mem: 7G
+    time: 0-0:20:00
+
+coverage_bedgraph:
+    job-name: "coverage_bedgraph.{wildcards.id}"
+    cpus-per-task: 4
+    mem: 8G
+    time: 0-1:00:00
+
+make_split_script:
+    job-name: "make_split_script"
+    cpus-per-task: 1
+    mem: 1G
+    time: 0-0:20:00
+
+run_split_script:
+    job-name: "run_split_script"
+    cpus-per-task: 1
+    mem: 1G
+    time: 0-0:20:00
+
+list_bams_for_rmats:
+    job-name: "list_bams_for_rmats"
+    cpus-per-task: 1
+    mem: 1G
+    time: 0-0:20:00
+
+merge_kallisto_tpm:
+    job-name: "merge_kallisto_tpm"
+    cpus-per-task: 4
     mem: 4G
     time: 0-1:00:00
 
-execute_split_bams_files:
-    cpus-per-task: 4
-    mem: 4G
-    time: 0-0:30:00
-
-run_rmats:
+rmats_original:
+    job-name: "rmats_original.{wildcards.comp}"
     cpus-per-task: 6
     mem: 4G
-    time: 0-0:30:00
+    time: 0-1:00:00
 
-filter_rmats:
-    cpus-per-task: 1
+rmats_coco:
+    job-name: "rmats_coco.{wildcards.comp}"
+    cpus-per-task: 6
     mem: 4G
+    time: 0-1:00:00
+
+filter_rmats_original:
+    job-name: "filter_rmats_original.{wildcards.comp}"
+    cpus-per-task: 2
+    mem: 89G
+    time: 0-0:20:00
+
+filter_rmats_coco:
+    job-name: "filter_rmats_coco.{wildcards.comp}"
+    cpus-per-task: 2
+    mem: 89G
+    time: 0-0:20:00
+
+transcriptome_deseq2_kallisto:
+    job-name: "transcriptome_deseq2_kallisto"
+    cpus-per-task: 3
+    mem: 4G
+    time: 0-0:20:00
+
+transcriptome_stats_kallisto:
+    job-name: "transcriptome_stats_kallisto"
+    cpus-per-task: 2
+    mem: 12G
+    time: 0-0:20:00
+
+transcriptome_deseq2_coco:
+    job-name: "transcriptome_deseq2_coco"
+    cpus-per-task: 3
+    mem: 4G
+    time: 0-0:20:00
+
+transcriptome_stats_coco:
+    job-name: "transcriptome_stats_coco"
+    cpus-per-task: 4
+    mem: 8G
     time: 0-1:00:00

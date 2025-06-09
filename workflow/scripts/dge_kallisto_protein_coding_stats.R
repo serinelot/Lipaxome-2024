@@ -1,66 +1,62 @@
+#!/usr/bin/env Rscript
 #––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-# 0) Packages et options
+# 0) Chargement des packages et options
 options(stringsAsFactors = FALSE)
-library(data.table)       # fread
-library(dplyr)
-library(ggplot2)
-library(ggrepel)
-library(DESeq2)
-library(clusterProfiler)
-library(org.Hs.eg.db)
-library(AnnotationDbi)
-library(patchwork)
+suppressPackageStartupMessages({
+  library(data.table)       # fread, fwrite, setnames
+  library(dplyr)            # left_join, mutate, filter
+  library(ggplot2)          # ggplot, ggsave
+  library(ggrepel)          # geom_text_repel
+  library(DESeq2)           # DESeq2 core
+  library(clusterProfiler)  # enrichGO, dotplot
+  library(org.Hs.eg.db)     # OrgDb pour humain
+  library(AnnotationDbi)    # select
+  library(patchwork)        # combiner plots
+})
 
 #––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-# 1) Lecture des résultats DESeq2
-résultats <- fread(
-  snakemake@input[[1]],
-  sep    = ",",
-  header = TRUE
-) %>%
-  rename(ensembl = 1)
+# 1) Lecture du résultat DESeq2 brut (un seul fichier .csv)
+input_csv <- snakemake@input[["deseq2"]]
+résultats <- fread(input_csv, sep = ",", header = TRUE)
 
-# 2) Annotation locale via org.Hs.eg.db
+# Renommer la première colonne (Ensembl IDs) en "gene"
+setnames(résultats,
+         old = names(résultats)[1],
+         new = "gene")
+
+# 2) Annotation des IDs Ensembl en symboles HGNC
 gene_info <- AnnotationDbi::select(
   x       = org.Hs.eg.db,
-  keys    = résultats$ensembl,
+  keys    = résultats$gene,
   keytype = "ENSEMBL",
   columns = c("SYMBOL")
 ) %>%
-  rename(
-    ensembl     = ENSEMBL,
-    gene_symbol = SYMBOL
-  )
+  rename(gene       = ENSEMBL,
+         gene_symbol = SYMBOL)
 
-# 3) Jointure et fallback à l’ID Ensembl
 résultats <- résultats %>%
-  left_join(gene_info, by = "ensembl") %>%
-  mutate(
-    gene_symbol = ifelse(is.na(gene_symbol), ensembl, gene_symbol)
-  )
+  left_join(gene_info, by = "gene") %>%
+  mutate(gene_symbol = ifelse(is.na(gene_symbol), gene, gene_symbol))
 
 #––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-# 4) Fonction pour volcano plot
+# 3) Fonction pour créer un volcano plot
 create_volcano_plot <- function(df, title = "", xlims = NULL, ylims = NULL) {
   df2 <- df %>%
     mutate(status = case_when(
-      padj < 0.05 & log2FoldChange >  1 ~ "surexprimé",
-      padj < 0.05 & log2FoldChange < -1 ~ "sousexprimé",
-      TRUE                              ~ "non_signif"
+      padj < 0.05 & log2FoldChange >  1 ~ "overexpressed",
+      padj < 0.05 & log2FoldChange < -1 ~ "underexpressed",
+      TRUE                              ~ "not_signif"
     ))
-  
-  p <- ggplot(df2, aes(
-      x = log2FoldChange,
-      y = -log10(pvalue),
-      color = status
-    )) +
+  p <- ggplot(df2, aes(x = log2FoldChange, y = -log10(pvalue), color = status)) +
     geom_point(size = 2) +
     scale_color_manual(values = c(
-      non_signif = "black",
-      surexprimé = "red",
-      sousexprimé = "blue"
+      not_signif    = "black",
+      overexpressed = "red",
+      underexpressed= "blue"
     )) +
-    labs(title = title, x = "Log2 Fold Change", y = "-Log10(p-value)") +
+    labs(title = title,
+         x     = "Log2 Fold Change",
+         y     = "-Log10(p-value)") +
     theme_minimal() +
     theme(
       legend.position = "none",
@@ -75,41 +71,42 @@ create_volcano_plot <- function(df, title = "", xlims = NULL, ylims = NULL) {
       box.padding  = unit(0.35, "lines"),
       point.padding= unit(0.5,  "lines")
     )
-  
   if (!is.null(xlims)) p <- p + xlim(xlims)
   if (!is.null(ylims)) p <- p + ylim(ylims)
   return(p)
 }
 
-# 5) Création et sauvegarde des volcano plots
-volcano_plot_total <- create_volcano_plot(résultats, "Volcano Plot - global")
-volcano_plot_zoom  <- create_volcano_plot(
+# 4) Génération et sauvegarde des volcano plots
+volcano_total <- create_volcano_plot(résultats, "Volcano Plot – Global")
+volcano_zoom  <- create_volcano_plot(
   résultats,
-  "Volcano Plot - zoom",
-  xlims = c(-10,10),
-  ylims = c(0,15)
+  "Volcano Plot – Zoom",
+  xlims = c(-5, 5),
+  ylims = c(0, 15)
 )
 
-ggsave(snakemake@output[["volcano_plot_total"]],
-       plot   = volcano_plot_total,
-       width  = 8, height = 6, dpi = 300)
-ggsave(snakemake@output[["volcano_plot_zoom"]],
-       plot   = volcano_plot_zoom,
-       width  = 8, height = 6, dpi = 300)
+ggsave(
+  filename = snakemake@output[["volcano_total"]],
+  plot     = volcano_total,
+  width    = 8, height = 6, dpi = 300
+)
+ggsave(
+  filename = snakemake@output[["volcano_zoom"]],
+  plot     = volcano_zoom,
+  width    = 8, height = 6, dpi = 300
+)
 
 #––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-# 6) Fonction générique pour enrichment GO
-run_go <- function(filter_expr, output_name, showCategory = 30) {
+# 5) Fonction générique pour enrichissement GO
+run_go <- function(filter_expr, output_key, showCategory = 30) {
   genes <- résultats %>%
     filter(eval(filter_expr)) %>%
-    pull(ensembl) %>%
+    pull(gene) %>%
     na.omit()
-  
   if (length(genes) == 0) {
-    message("Aucun gène pour ", output_name)
+    message("Aucun gène pour ", output_key)
     return(NULL)
   }
-  
   ego <- enrichGO(
     gene          = genes,
     OrgDb         = org.Hs.eg.db,
@@ -119,33 +116,30 @@ run_go <- function(filter_expr, output_name, showCategory = 30) {
     qvalueCutoff  = 0.05,
     readable      = TRUE
   )
-  
   if (!is.null(ego) && nrow(ego@result) > 0) {
     p <- dotplot(ego, showCategory = showCategory) +
-         ggtitle(output_name) +
+         ggtitle(output_key) +
          theme_minimal()
     ggsave(
-      filename = snakemake@output[[output_name]],
+      filename = snakemake@output[[output_key]],
       plot     = p,
       width    = 8, height = 6, dpi = 300
     )
   } else {
-    message("Pas de termes GO significatifs pour ", output_name)
+    message("Pas de termes GO significatifs pour ", output_key)
   }
 }
 
-# Enrichissements GO global, up, down
-run_go(TRUE,                         "go_enrichment_total", showCategory = 30)
-run_go(quote(padj < 0.05 & log2FoldChange >  0),
-       "go_enrichment_up",    showCategory = 30)
-run_go(quote(padj < 0.05 & log2FoldChange <  0),
-       "go_enrichment_down",  showCategory = 25)
+# 6) Enrichissements GO global / up / down
+run_go(TRUE,                                   "go_total", showCategory = 30)
+run_go(quote(padj < 0.05 & log2FoldChange >  0), "go_enrich_up",   showCategory = 25)
+run_go(quote(padj < 0.05 & log2FoldChange <  0), "go_enrich_down", showCategory = 25)
 
 #––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-# 7) Sauvegarde du tableau annoté en CSV
+# 7) Sauvegarde du tableau annoté complet (statistiques + symboles)
 fwrite(
   résultats,
-  file      = snakemake@output[["deseq2_stat"]],
+  file      = snakemake@output[["stat"]],
   sep       = ",",
   quote     = FALSE,
   row.names = FALSE

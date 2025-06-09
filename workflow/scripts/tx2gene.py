@@ -1,43 +1,52 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
+"""
+Génère un fichier tx2gene.tsv à partir d'un fichier GTF.
 
-### Adapted from Danny Bergeron's code
+Pour chaque transcript_id du GTF, on extrait la gene_id associée.
+Le résultat est écrit en deux colonnes : transcript_id \t gene_id
+"""
 
-import pandas as pd
 import re
+from pathlib import Path
 
-gtf_file = snakemake.input.gtf
-out_file = snakemake.output.tsv
+# Récupération des chemins via Snakemake
+gtf_path = Path(snakemake.input.gtf)
+out_path = Path(snakemake.output.tsv)
 
-def transcript2gene(gtf_file):
-    # Creating a transcript -> gene dictionary
-    tr_dict = dict()
-    with open(str(gtf_file)) as f:
-        for line in f:
-            trans_id = ''
-            gene_id = ''
+# Dictionnaire transcript → gene
+tx2gene = {}
 
-            if 'gene_id' in line:
-                gene_id = re.search(
-                    r'gene_id "(.*?)"[;,]', line
-                ).group(1)
-                gene_id = gene_id.split(',')[0]
+with gtf_path.open("r") as f:
+    for line in f:
+        # Ignorer les commentaires
+        if line.startswith("#"):
+            continue
 
-            if 'transcript_id' in line:
-                trans_id = re.search(
-                    r'transcript_id "(.*?)"[;]', line
-                ).group(1)
+        cols = line.strip().split("\t")
+        feature = cols[2]
 
-            # Insert in tr dict
-            if trans_id and gene_id and trans_id not in tr_dict:
-                tr_dict[trans_id] = gene_id
+        # On ne garde que les transcripts (ou exons si besoin)
+        if feature != "transcript":
+            continue
 
-            gene_id = ''
-            trans_id = ''
-    return tr_dict
+        attrs = cols[8]
 
-# Generate the dictionary
-_dict = transcript2gene(gtf_file)
+        # Recherche des IDs
+        gene_m = re.search(r'gene_id "([^"]+)"', attrs)
+        tx_m   = re.search(r'transcript_id "([^"]+)"', attrs)
 
-with open(out_file, 'w') as f:
-    for key, value in _dict.items():
-        f.write(str(key) + '\t' + value + '\n')
+        if not gene_m or not tx_m:
+            continue
+
+        gene_id      = gene_m.group(1)
+        transcript_id = tx_m.group(1)
+
+        # Ne pas écraser si déjà trouvé (première occurrence)
+        if transcript_id not in tx2gene:
+            tx2gene[transcript_id] = gene_id
+
+# Écriture du fichier de sortie, trié par transcript_id
+out_path.parent.mkdir(parents=True, exist_ok=True)
+with out_path.open("w") as f:
+    for tx in sorted(tx2gene):
+        f.write(f"{tx}\t{tx2gene[tx]}\n")

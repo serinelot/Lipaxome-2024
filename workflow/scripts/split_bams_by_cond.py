@@ -1,33 +1,40 @@
+#!/usr/bin/env python3
 import pandas as pd
+from pathlib import Path
 
-# Lire le fichier de design, en assumant que le répertoire courant est workflow
+# 1) Lire le design
 design = pd.read_csv("data/design.tsv", sep="\t")
 
-# Chemin où se trouvent actuellement les fichiers BAM, relativement à workflow
-src_dir = "results/splicing/star/"
+# 2) Chemin source des BAM primaires
+src_base = Path("results/splicing/star")
 
-# Dossiers de destination basés sur les conditions, relativement à workflow
+# 3) Répertoires de destination par condition
+dest_base = Path("results/splicing/star")
 dest_dirs = {
-    "FXS": "results/splicing/star_FXS/",
-    "Control": "results/splicing/star_Control/"
+    "FXS":     dest_base / "FXS",
+    "Control": dest_base / "Control",
 }
 
-# Générer les commandes pour créer les dossiers de destination s'ils n'existent pas
-with open("scripts/split_bams_files.sh", "w") as f:
-    # S'assurer que les dossiers de destination existent
-    for dest in dest_dirs.values():
-        f.write(f"mkdir -p {dest}\n")
-    
-    # Générer les commandes de copie des fichiers BAM et leurs fichiers d'index .bai
-    for index, row in design.iterrows():
-        # Ajuster les chemins source pour correspondre à la structure des fichiers et dossiers
-        src_file_bam = f"{src_dir}{row['sample']}/{row['sample']}_Aligned.sortedByCoord.out.primary.bam"
-        src_file_bai = f"{src_dir}{row['sample']}/{row['sample']}_Aligned.sortedByCoord.out.primary.bam.bai"
-        
-        # Définir les chemins de destination, incluant l'identifiant dans le nom du fichier
-        dest_file_bam = f"{dest_dirs[row['condition']]}{row['sample']}_Aligned.sortedByCoord.out.primary.bam"
-        dest_file_bai = f"{dest_dirs[row['condition']]}{row['sample']}_Aligned.sortedByCoord.out.primary.bam.bai"
-        
-        # Écrire les commandes pour copier les fichiers BAM et leurs index
-        f.write(f"cp {src_file_bam} {dest_file_bam}\n")
-        f.write(f"cp {src_file_bai} {dest_file_bai}\n")
+# 4) Ouvrir le script à générer
+script_path = Path("scripts/split_bams_by_cond.sh")
+script_path.parent.mkdir(parents=True, exist_ok=True)
+
+with script_path.open("w") as out:
+    out.write("#!/usr/bin/env bash\n\n")
+    # Créer les répertoires de destination
+    for d in dest_dirs.values():
+        out.write(f"mkdir -p {d}\n")
+    out.write("\n")
+    # Pour chaque échantillon, copier le BAM & son index .bai au bon endroit
+    for _, row in design.iterrows():
+        samp      = row["sample"]
+        cond      = row["condition"]
+        src_dir   = src_base / samp
+        bam_file  = src_dir / f"{samp}_Aligned.sortedByCoord.out.primary.bam"
+        bai_file  = src_dir / f"{samp}_Aligned.sortedByCoord.out.primary.bam.bai"
+        dest_dir  = dest_dirs[cond]
+        dest_bam  = dest_dir / bam_file.name
+        dest_bai  = dest_dir / bai_file.name
+
+        out.write(f"cp {bam_file} {dest_bam}\n")
+        out.write(f"cp {bai_file} {dest_bai}\n")
