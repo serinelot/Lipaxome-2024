@@ -1,0 +1,15 @@
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - r-base=4.3.2
+  - bioconductor-reactomepa
+  - bioconductor-org.hs.eg.db
+  - bioconductor-clusterprofiler
+  - r-tidyverse
+  - r-stringr
+  - r-ggplot2
+  - r-readr
+  - r-dplyr
+  - r-data.table

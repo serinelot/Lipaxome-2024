@@ -1,0 +1,17 @@
+old_fastq_name;new_fastq_name
+LipX06_S1_R1_001.fastq.gz;LipX06_1.fastq.gz
+LipX06_S1_R2_001.fastq.gz;LipX06_2.fastq.gz
+LipX14_S2_R1_001.fastq.gz;LipX14_1.fastq.gz
+LipX14_S2_R2_001.fastq.gz;LipX14_2.fastq.gz
+LipX16_S3_R1_001.fastq.gz;LipX16_1.fastq.gz
+LipX16_S3_R2_001.fastq.gz;LipX16_2.fastq.gz
+LipX18_S4_R1_001.fastq.gz;LipX18_1.fastq.gz
+LipX18_S4_R2_001.fastq.gz;LipX18_2.fastq.gz
+LipC03_S5_R1_001.fastq.gz;LipC03_1.fastq.gz
+LipC03_S5_R2_001.fastq.gz;LipC03_2.fastq.gz
+LipC15_S6_R1_001.fastq.gz;LipC15_1.fastq.gz
+LipC15_S6_R2_001.fastq.gz;LipC15_2.fastq.gz
+LipC17_S7_R1_001.fastq.gz;LipC17_1.fastq.gz
+LipC17_S7_R2_001.fastq.gz;LipC17_2.fastq.gz
+LipC26_S8_R1_001.fastq.gz;LipC26_1.fastq.gz
+LipC26_S8_R2_001.fastq.gz;LipC26_2.fastq.gz

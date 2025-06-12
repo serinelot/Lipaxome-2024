@@ -92,7 +92,13 @@ rule VIb_dge_coco:
         build_tx2gene_pc_coco = "data/references/tx2gene_protein_coding_coco.tsv",
         dge_coco_protein_coding = expand('results/dge/coco_protein_coding/{comp}_DESeq2_gene.csv', comp = comparisons),
         dge_coco_protein_coding_stats = expand("results/dge/coco_protein_coding/{comp}_deseq2_stats.csv", comp=comparisons),
-        dge_go_enrichment = expand("results/dge/coco_protein_coding/go/{comp}_go_enrichment.csv", comp = comparisons)
+        dge_go_enrichment = expand("results/dge/coco_protein_coding/go/total/{comp}_go_enrichment_total.csv", comp = comparisons),
+        dge_kegg_enrichment = expand("results/dge/coco_protein_coding/kegg/total/{comp}_kegg_enrichment_total.csv", comp = comparisons),
+        dge_reactome_enrichment = expand("results/dge/coco_protein_coding/reactome/total/{comp}_reactome_enrichment_total.csv", comp = comparisons),
+        dge_ma_plot = expand("results/dge/coco_protein_coding/{comp}_MAplot.png", comp = comparisons),
+        dge_heatmap_degs = expand("results/dge/coco_protein_coding/heatmap/{comp}_heatmap_topDEG.png", comp = comparisons),
+        dge_pca_plot = expand("results/dge/coco_protein_coding/{comp}_PCAplot.png", comp = comparisons),
+        dge_tsne_plot = expand("results/dge/coco_protein_coding/{comp}_tSNEplot.png", comp = comparisons)
 
 
 ########################################## DGE kallisto vs Coco ############################################################

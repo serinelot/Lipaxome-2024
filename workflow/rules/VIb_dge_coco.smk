@@ -78,7 +78,10 @@ rule dge_coco_protein_coding:
         out_files = expand(
             "results/dge/coco_protein_coding/{comp}_DESeq2_gene.csv",
             comp = comparisons
-        )
+        ),
+        vst_mat   = expand(
+            "results/dge/coco_protein_coding/{comp}_vst_matrix.csv",
+            comp = comparisons)  
     params:
         coco_dir               = "results/quant/coco",
         filter_count_threshold = config["dge"]["filter_count_threshold"]
@@ -90,6 +93,7 @@ rule dge_coco_protein_coding:
         "../envs/DESeq2.yml"
     script:
         "../scripts/dge_coco_protein_coding.R"
+
 
 
 rule dge_coco_protein_coding_stats:
@@ -115,18 +119,134 @@ rule dge_coco_protein_coding_stats:
 
 rule dge_go_enrichment:
     """
-    Analyse d'enrichissement GO sur les gènes différentiellement exprimés (padj <= 0.05).
-    Génère un tableau de résultats et un barplot des top termes enrichis.
+    Analyse d'enrichissement GO (total, up, down) dans des dossiers séparés.
     """
     input:
-        stats = rules.dge_coco_protein_coding_stats.output.stat
+        stats = "results/dge/coco_protein_coding/{comp}_deseq2_stats.csv"
     output:
-        enrich_csv = "results/dge/coco_protein_coding/go/{comp}_go_enrichment.csv",
-        barplot    = "results/dge/coco_protein_coding/go/{comp}_go_enrichment_barplot.png"
+        enrich_total_csv = "results/dge/coco_protein_coding/go/total/{comp}_go_enrichment_total.csv",
+        enrich_up_csv    = "results/dge/coco_protein_coding/go/up/{comp}_go_enrichment_up.csv",
+        enrich_down_csv  = "results/dge/coco_protein_coding/go/down/{comp}_go_enrichment_down.csv",
+        barplot_total    = "results/dge/coco_protein_coding/go/total/{comp}_go_enrichment_barplot_total.png",
+        barplot_up       = "results/dge/coco_protein_coding/go/up/{comp}_go_enrichment_barplot_up.png",
+        barplot_down     = "results/dge/coco_protein_coding/go/down/{comp}_go_enrichment_barplot_down.png"
     params:
-        org_db = "org.Hs.eg.db",     # Adapter si nécessaire
-        ont = "BP",                  # "BP" (biological process), "MF", "CC"
-        top_n = 15                   # Nombre de termes à afficher dans le barplot
+        org_db = "org.Hs.eg.db",
+        ont = "BP",
+        top_n = 15
     script:
         "../scripts/dge_go_enrichment.R"
+
+
+rule dge_kegg_enrichment:
+    """
+    Enrichissement KEGG pour tous les DEGs, up et down, avec sorties dans dossiers dédiés.
+    """
+    input:
+        stats = "results/dge/coco_protein_coding/{comp}_deseq2_stats.csv"
+    output:
+        enrich_total_csv = "results/dge/coco_protein_coding/kegg/total/{comp}_kegg_enrichment_total.csv",
+        enrich_up_csv    = "results/dge/coco_protein_coding/kegg/up/{comp}_kegg_enrichment_up.csv",
+        enrich_down_csv  = "results/dge/coco_protein_coding/kegg/down/{comp}_kegg_enrichment_down.csv",
+        barplot_total    = "results/dge/coco_protein_coding/kegg/total/{comp}_kegg_enrichment_barplot_total.png",
+        barplot_up       = "results/dge/coco_protein_coding/kegg/up/{comp}_kegg_enrichment_barplot_up.png",
+        barplot_down     = "results/dge/coco_protein_coding/kegg/down/{comp}_kegg_enrichment_barplot_down.png"
+    params:
+        species = "hsa", # Code KEGG ("hsa" humain, "mmu" mouse, etc)
+        top_n = 15
+    script:
+        "../scripts/dge_enrichKEGG.R"
+
+
+rule dge_reactome_enrichment:
+    """
+    Enrichissement Reactome pour tous les DEGs, up et down, avec sorties dans dossiers dédiés.
+    """
+    input:
+        stats = "results/dge/coco_protein_coding/{comp}_deseq2_stats.csv"
+    output:
+        enrich_total_csv = "results/dge/coco_protein_coding/reactome/total/{comp}_reactome_enrichment_total.csv",
+        enrich_up_csv    = "results/dge/coco_protein_coding/reactome/up/{comp}_reactome_enrichment_up.csv",
+        enrich_down_csv  = "results/dge/coco_protein_coding/reactome/down/{comp}_reactome_enrichment_down.csv",
+        barplot_total    = "results/dge/coco_protein_coding/reactome/total/{comp}_reactome_enrichment_barplot_total.png",
+        barplot_up       = "results/dge/coco_protein_coding/reactome/up/{comp}_reactome_enrichment_barplot_up.png",
+        barplot_down     = "results/dge/coco_protein_coding/reactome/down/{comp}_reactome_enrichment_barplot_down.png"
+    params:
+        organism = "human", # "human" ou "mouse"
+        top_n = 15
+    conda:
+        "../envs/reactome.yml"
+    script:
+        "../scripts/dge_reactome_enrichment.R"
+
+
+rule dge_ma_plot:
+    """
+    Génère un MA plot (log2FC vs expression moyenne) à partir du CSV DESeq2.
+    """
+    input:
+        stats = "results/dge/coco_protein_coding/{comp}_DESeq2_gene.csv"
+    output:
+        ma_plot = "results/dge/coco_protein_coding/{comp}_MAplot.png"
+    params:
+        padj_threshold = 0.05
+    script:
+        "../scripts/dge_ma_plot.R"
+
+
+rule dge_heatmap_degs:
+    """
+    Heatmap des gènes différentiellement exprimés (padj < 0.05, top 50 par |log2FC|).
+    """
+    input:
+        vst_mat = "results/dge/coco_protein_coding/{comp}_vst_matrix.csv",
+        degs    = "results/dge/coco_protein_coding/{comp}_deseq2_stats.csv",
+        samples = "data/design.tsv"
+    output:
+        heatmap = "results/dge/coco_protein_coding/heatmap/{comp}_heatmap_topDEG.png"
+    params:
+        padj_threshold = 0.05,
+        top_n = 60
+    conda:
+        "../envs/pheatmap.yml"
+    script:
+        "../scripts/dge_heatmap_degs.R"
+
+
+rule dge_pca_plot:
+    """
+    Génère un PCA plot des échantillons à partir de la matrice VST.
+    """
+    input:
+        vst_mat = "results/dge/coco_protein_coding/{comp}_vst_matrix.csv",
+        samples = "data/design.tsv"
+    output:
+        pca_plot = "results/dge/coco_protein_coding/{comp}_PCAplot.png"
+    params:
+        ntop = 500  # Nombre de gènes les plus variables à utiliser
+    conda:
+        "../envs/DESeq2.yml"   # Ou ton env DESeq2 si tu veux ggplot2
+    script:
+        "../scripts/dge_pca_plot.R"
+
+
+rule dge_tsne_plot:
+    """
+    Génère un t-SNE plot des échantillons à partir de la matrice VST.
+    """
+    input:
+        vst_mat = "results/dge/coco_protein_coding/{comp}_vst_matrix.csv",
+        samples = "data/design.tsv"
+    output:
+        tsne_plot = "results/dge/coco_protein_coding/{comp}_tSNEplot.png"
+    params:
+        ntop = 500,           # Nombre de gènes les plus variables à utiliser
+        perplexity = 2        # À adapter (<= n/3 pour n échantillons)
+    conda:
+        "../envs/DESeq2.yml"
+    script:
+        "../scripts/dge_tsne_plot.R"
+
+
+
 

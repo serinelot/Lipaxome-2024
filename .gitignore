@@ -2,7 +2,6 @@
 workflow/.snakemake/
 workflow/data/fastq/
 workflow/data/references/download_fastq.done
-workflow/data/references/fastq_rename.csv
 workflow/data/references/genome_fa/
 workflow/data/references/gtf/
 workflow/data/references/kallisto.idx

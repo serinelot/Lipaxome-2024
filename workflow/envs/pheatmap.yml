@@ -1,0 +1,10 @@
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - r-base
+  - r-pheatmap
+  - r-readr
+  - r-dplyr
+  - r-tibble

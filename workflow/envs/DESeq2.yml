@@ -39,4 +39,6 @@ dependencies:
   - r-ggraph=2.1.0
   - bioconductor-enrichplot=1.20.0
   - bioconductor-clusterprofiler=4.8.1
+  - r-ggplot2
+  - r-rtsne 
   

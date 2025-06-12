@@ -2,6 +2,7 @@
 suppressPackageStartupMessages({
   library(clusterProfiler)
   library(org.Hs.eg.db)
+  library(ReactomePA)
   library(ggplot2)
   library(dplyr)
   library(readr)
@@ -16,30 +17,37 @@ output_down     <- snakemake@output[["enrich_down_csv"]]
 plot_total      <- snakemake@output[["barplot_total"]]
 plot_up         <- snakemake@output[["barplot_up"]]
 plot_down       <- snakemake@output[["barplot_down"]]
-org_db          <- snakemake@params[["org_db"]]
-ont             <- snakemake@params[["ont"]]
+organism        <- snakemake@params[["organism"]] # "human" ou "mouse"
 top_n           <- snakemake@params[["top_n"]]
 
 # ========== Lecture du fichier ==========
 df <- read_csv(input_file, show_col_types = FALSE)
 
-# ========== Définition des listes de gènes ==========
+# ========== Sélection des listes ==========
 genes_total <- unique(df$gene)
 genes_up    <- unique(df$gene[df$log2FoldChange > 0])
 genes_down  <- unique(df$gene[df$log2FoldChange < 0])
 
-# ========== Fonction d'enrichissement ==========
-run_enrichGO <- function(gene_list, org_db, ont) {
-  if(length(gene_list) == 0) return(NULL)
-  enrichGO(
-    gene          = gene_list,
-    OrgDb         = get(org_db),
-    keyType       = "ENSEMBL",
-    ont           = ont,
+# ========== Conversion ENSEMBL -> ENTREZID ==========
+convert_ensembl_to_entrez <- function(gene_list) {
+  gene_df <- bitr(gene_list, fromType = "ENSEMBL", toType = "ENTREZID", OrgDb = org.Hs.eg.db)
+  entrez_ids <- unique(gene_df$ENTREZID)
+  entrez_ids[!is.na(entrez_ids)]
+}
+
+entrez_total <- convert_ensembl_to_entrez(genes_total)
+entrez_up    <- convert_ensembl_to_entrez(genes_up)
+entrez_down  <- convert_ensembl_to_entrez(genes_down)
+
+# ========== Fonction enrichissement Reactome ==========
+run_enrichPathway <- function(entrez_ids, organism) {
+  if(length(entrez_ids) == 0) return(NULL)
+  enrichPathway(
+    gene         = entrez_ids,
+    organism     = organism,  # "human" ou "mouse"
+    pvalueCutoff = 0.05,
     pAdjustMethod = "BH",
-    pvalueCutoff  = 0.05,
-    qvalueCutoff  = 0.2,
-    readable      = TRUE
+    readable     = TRUE
   )
 }
 
@@ -53,7 +61,7 @@ plot_enrichment <- function(res, top_n, title, file) {
       geom_bar(stat = "identity") +
       coord_flip() +
       labs(title = title,
-           x = "GO term",
+           x = "Reactome pathway",
            y = "-log10(adjusted p-value)") +
       theme_minimal(base_size = 11) +
       theme(axis.text.y = element_text(size = 10)) +
@@ -64,25 +72,31 @@ plot_enrichment <- function(res, top_n, title, file) {
 
 # ========== Enrichissement et export ==========
 # TOTAL
-ego_total <- run_enrichGO(genes_total, org_db, ont)
-if (!is.null(ego_total)) {
-  res_total <- as.data.frame(ego_total)
+epath_total <- run_enrichPathway(entrez_total, organism)
+if (!is.null(epath_total)) {
+  res_total <- as.data.frame(epath_total)
   write_csv(res_total, output_total)
-  plot_enrichment(res_total, top_n, paste("Top", top_n, "GO terms TOTAL (", ont, ")"), plot_total)
+  plot_enrichment(res_total, top_n, paste("Top", top_n, "Reactome pathways TOTAL"), plot_total)
+} else {
+  write_csv(tibble(), output_total)
 }
 
 # UP
-ego_up <- run_enrichGO(genes_up, org_db, ont)
-if (!is.null(ego_up)) {
-  res_up <- as.data.frame(ego_up)
+epath_up <- run_enrichPathway(entrez_up, organism)
+if (!is.null(epath_up)) {
+  res_up <- as.data.frame(epath_up)
   write_csv(res_up, output_up)
-  plot_enrichment(res_up, top_n, paste("Top", top_n, "GO terms UP (", ont, ")"), plot_up)
+  plot_enrichment(res_up, top_n, paste("Top", top_n, "Reactome pathways UP"), plot_up)
+} else {
+  write_csv(tibble(), output_up)
 }
 
 # DOWN
-ego_down <- run_enrichGO(genes_down, org_db, ont)
-if (!is.null(ego_down)) {
-  res_down <- as.data.frame(ego_down)
+epath_down <- run_enrichPathway(entrez_down, organism)
+if (!is.null(epath_down)) {
+  res_down <- as.data.frame(epath_down)
   write_csv(res_down, output_down)
-  plot_enrichment(res_down, top_n, paste("Top", top_n, "GO terms DOWN (", ont, ")"), plot_down)
+  plot_enrichment(res_down, top_n, paste("Top", top_n, "Reactome pathways DOWN"), plot_down)
+} else {
+  write_csv(tibble(), output_down)
 }
