@@ -6,8 +6,7 @@ rule transcriptome_deseq2_coco:
     input:
         quant       = expand("results/quant/coco/{id}.tsv", id=id_list),
         samples     = "data/design.tsv",
-        comparisons = "data/comparisons.tsv",
-        tx2gene     = rules.build_tx2gene_all.output.tx2gene_all
+        comparisons = "data/comparisons.tsv"
     output:
         results   = directory("results/transcriptome/coco/deseq2"),
         out_files = expand(

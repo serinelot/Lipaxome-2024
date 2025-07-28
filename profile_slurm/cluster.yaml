@@ -203,6 +203,18 @@ transcriptome_stats_kallisto:
     mem: 12G
     time: 0-0:20:00
 
+gene_deseq2_kallisto:
+    job-name: "gene_deseq2_kallisto"
+    cpus-per-task: 3
+    mem: 4G
+    time: 0-0:20:00
+
+gene_stats_kallisto:
+    job-name: "gene_stats_kallisto"
+    cpus-per-task: 2
+    mem: 12G
+    time: 0-0:20:00
+
 transcriptome_deseq2_coco:
     job-name: "transcriptome_deseq2_coco"
     cpus-per-task: 3

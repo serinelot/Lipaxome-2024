@@ -36,6 +36,7 @@ include: "rules/VIb_dge_coco.smk"
 include: "rules/VIc_dge_kallisto_vs_coco.smk"
 include: "rules/VII_splicing.smk"
 include: "rules/VIIIa_transcriptome_kallisto.smk"
+include: "rules/VIIIb_transcriptome_coco.smk"
 
 
 ####################################### LOCAL ########################################
@@ -43,7 +44,8 @@ rule I_download:                                                                
     input:                                                                           #
         download_human_genome = "data/references/genome_fa/homo_sapiens_genome.fa",  #
         clone_coco = 'git_repos/coco',                                               #
-        tx2gene = "data/references/tx2gene.tsv"                                      #
+        tx2gene = "data/references/tx2gene.tsv" ,                                    #
+        build_tx2gene_all = "data/references/tx2gene_all.tsv",                       #                                                                                 #
                                                                                      #
 rule II_fastq:                                                                       #
     input:                                                                           #
@@ -126,4 +128,13 @@ rule VII_splicing:
 rule VIIIa_transcriptome_kallisto:
     input:
         transcriptome_deseq2_kallisto= expand("results/transcriptome/kallisto/deseq2/{comp}_DESeq2_transcripts.csv", comp = comparisons),
-        transcriptome_stats_kallisto = expand("results/transcriptome/kallisto/deseq2/{comp}_transcriptome_stats.csv", comp = comparisons)
+        transcriptome_stats_kallisto = expand("results/transcriptome/kallisto/deseq2/{comp}_transcriptome_stats.csv", comp = comparisons),
+        gene_deseq2_kallisto = expand("results/transcriptome/kallisto/deseq2/gene/{comp}_DESeq2_genes.csv", comp = comparisons),
+        gene_stats_kallisto = expand("results/transcriptome/kallisto/deseq2/gene/{comp}_gene_stats.csv", comp = comparisons)
+
+
+########################################## DGE transcriptome coco ############################################################
+rule VIIIb_transcriptome_coco:
+    input:
+        transcriptome_deseq2_coco = expand("results/transcriptome/coco/deseq2/{comp}_DESeq2_transcripts.csv", comp = comparisons),
+        transcriptome_stats_coco = expand("results/transcriptome/coco/deseq2/{comp}_transcriptome_stats.csv", comp = comparisons)

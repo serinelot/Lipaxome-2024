@@ -56,3 +56,20 @@ rule tx2gene:
         "../envs/python.yml"
     script:
         "../scripts/tx2gene.py"
+
+
+rule build_tx2gene_all:
+    """
+    Générer tx2gene_all.tsv (tous biotypes) depuis le GTF complet
+    Utile pour sommer isoformes coding + non-coding.
+    """
+    input:
+        gtf = config["download"]["human_gtf"]
+    output:
+        tx2gene_all = "data/references/tx2gene_all.tsv"
+    log:
+        "logs/references/tx2gene_all.log"
+    conda:
+        "../envs/python.yml"
+    script:
+        "../scripts/tx2gene_all.py"
