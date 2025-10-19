@@ -55,6 +55,42 @@ rule coverage_bedgraph:
         | sort -k1,1 -k2,2n > {output.bedgraph}
         """
 
+rule bedgraph_to_bigwig:
+    """
+    Convertit le fichier bedGraph en bigWig, basé sur les tailles chromosomiques.
+    """
+    input:
+        bedgraph = "results/splicing/genomecov/{id}.bedgraph",
+        chrom_sizes = rules.fai_to_chromsizes.output.chrom_sizes
+    output:
+        bigwig = "results/splicing/genomecov/{id}.bw"
+    conda:
+        "../envs/genomecov.yml"
+    message:
+        "Conversion BedGraph -> BigWig pour {wildcards.id}"
+    shell:
+        """
+        bedGraphToBigWig {input.bedgraph} {input.chrom_sizes} {output.bigwig}
+        """
+
+rule index_gtf:
+    input:
+        gtf="data/references/gtf/Homo_sapiens.GRCh38.115.gtf"
+    output:
+        gtf_gz="data/references/gtf/Homo_sapiens.GRCh38.115.gtf.sorted.gz",
+        tbi="data/references/gtf/Homo_sapiens.GRCh38.115.gtf.sorted.gz.tbi"
+    conda:
+        "../envs/genomecov.yml"
+    shell:
+        """
+        sort -k1,1 -k4,4n {input.gtf} > {input.gtf}.sorted
+        bgzip -c {input.gtf}.sorted > {output.gtf_gz}
+        tabix -p gff {output.gtf_gz}
+        rm {input.gtf}.sorted
+        """
+
+
+
 rule make_split_script:
     """
     Générer le script Bash pour séparer les BAM par condition.

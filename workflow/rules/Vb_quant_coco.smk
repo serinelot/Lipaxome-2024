@@ -7,7 +7,7 @@ rule coco_correct_annotation:
         gtf      = config["download"]["human_gtf"],
         coco_dir = rules.clone_coco.output.repo_dir
     output:
-        gtf_corr = "data/references/gtf/Homo_sapiens.GRCh38.110_snoRNAs_tRNAs_correct_annotation.gtf"
+        gtf_corr = "data/references/gtf/Homo_sapiens.GRCh38.115_correct_annotation.gtf"
     message: "Correcting GTF annotation by COCO"
     conda:
         "../envs/coco.yml"
@@ -25,7 +25,7 @@ rule coco_quant:
     produit counts, CPM et TPM pour chaque échantillon.
     """
     input:
-        gtf_corr = "data/references/gtf/Homo_sapiens.GRCh38.110_snoRNAs_tRNAs_correct_annotation.gtf",
+        gtf_corr = "data/references/gtf/Homo_sapiens.GRCh38.115_correct_annotation.gtf",
         bam      = "results/alignment/star/{id}/Aligned.sortedByCoord.out.bam"
     output:
         counts   = "results/quant/coco/{id}.tsv"

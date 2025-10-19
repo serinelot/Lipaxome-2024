@@ -5,7 +5,7 @@ rule download_human_genome:
     puis le déplacer à son emplacement final.
     """
     output:
-        genome = "data/references/genome_fa/homo_sapiens_genome.fa"
+        genome = "data/references/genome_fa/Homo_sapiens.GRCh38.115.dna.primary_assembly.fa"
     params:
         link = config["download"]["human_genome_fa"]
     log:
@@ -20,6 +20,22 @@ rule download_human_genome:
           &>> {log}
         mv data/references/genome_fa/temp.fa {output.genome}
         """
+
+rule fai_to_chromsizes:
+    """
+    Génère le fichier .chrom.sizes à partir de l'index fasta (.fai).
+    """
+    input:
+        fai = "data/references/genome_fa/Homo_sapiens.GRCh38.115.dna.primary_assembly.fa.fai"
+    output:
+        chrom_sizes = "data/references/genome_fa/GRCh38.115.chrom.sizes"
+    message:
+        "Extraction des tailles de chromosomes depuis le .fai"
+    shell:
+        """
+        cut -f1,2 {input.fai} > {output.chrom_sizes}
+        """
+
 
 rule clone_coco:
     """

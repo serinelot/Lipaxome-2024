@@ -10,8 +10,8 @@ fastq:
   sra_list:   "data/references/sra_id_wget.txt"
 
 download:
-  human_gtf: "data/references/gtf/Homo_sapiens.GRCh38.110_snoRNAs_tRNAs.gtf"
-  human_genome_fa: "http://ftp.ensembl.org/pub/release-110/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz"
+  human_gtf: "data/references/gtf/Homo_sapiens.GRCh38.115.gtf"
+  human_genome_fa: "http://ftp.ensembl.org/pub/release-115/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz"
 
 dge:
   filter_count_threshold: 10

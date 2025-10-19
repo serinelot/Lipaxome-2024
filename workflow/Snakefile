@@ -42,7 +42,8 @@ include: "rules/VIIIb_transcriptome_coco.smk"
 ####################################### LOCAL ########################################
 rule I_download:                                                                     #
     input:                                                                           #
-        download_human_genome = "data/references/genome_fa/homo_sapiens_genome.fa",  #
+        download_human_genome = "data/references/genome_fa/Homo_sapiens.GRCh38.115.dna.primary_assembly.fa",
+        fai_to_chromsizes = "data/references/genome_fa/GRCh38.115.chrom.sizes",
         clone_coco = 'git_repos/coco',                                               #
         tx2gene = "data/references/tx2gene.tsv" ,                                    #
         build_tx2gene_all = "data/references/tx2gene_all.tsv",                       #                                                                                 #
@@ -76,15 +77,15 @@ rule Va_quant_kallisto:
 rule VIa_dge_kallisto:
     input:
         filter_protein_coding_gtf = "data/references/gtf/Homo_sapiens.GRCh38.110_protein_coding.gtf",
-        build_tx2gene_pc = "data/references/tx2gene_protein_coding.tsv",
-        dge_kallisto_protein_coding = expand('results/dge/kallisto_protein_coding/{comp}_DESeq2_gene.csv', comp = comparisons),
-        dge_kallisto_protein_coding_stats = expand("results/dge/kallisto_protein_coding/{comp}_deseq2_stats.csv", comp=comparisons)
+        build_tx2gene_pc = "data/references/tx2gene_protein_coding.tsv"
+        #dge_kallisto_protein_coding = expand('results/dge/kallisto_protein_coding/{comp}_DESeq2_gene.csv', comp = comparisons),
+        #dge_kallisto_protein_coding_stats = expand("results/dge/kallisto_protein_coding/{comp}_deseq2_stats.csv", comp=comparisons)
 
 
 ########################################## DGE Coco ############################################################
 rule Vb_quant_coco:
     input:
-        coco_correct_annotation = "data/references/gtf/Homo_sapiens.GRCh38.110_snoRNAs_tRNAs_correct_annotation.gtf",
+        coco_correct_annotation = "data/references/gtf/Homo_sapiens.GRCh38.115_correct_annotation.gtf",
         coco_quant = expand("results/quant/coco/{id}.tsv", id = id_list),
         merge_coco_cc = "results/quant/coco_merged_counts.tsv"
 
@@ -114,6 +115,8 @@ rule VII_splicing:
         extract_primary_alignments= expand("results/splicing/star/{id}/{id}_Aligned.sortedByCoord.out.primary.bam", id = id_list),
         index_primary_bam = expand("results/splicing/star/{id}/{id}_Aligned.sortedByCoord.out.primary.bam.bai", id = id_list),
         coverage_bedgraph = expand("results/splicing/genomecov/{id}.bedgraph", id = id_list),
+        bedgraph_to_bigwig = expand("results/splicing/genomecov/{id}.bw", id = id_list),
+        index_gtf = "data/references/gtf/Homo_sapiens.GRCh38.115.gtf.sorted.gz.tbi",
         make_split_script = "scripts/split_bams_by_cond.sh",
         run_split_script = "results/splicing/star/split_bam_done.txt",
         list_bams_for_rmats = "results/splicing/rmats/fxs_bam_list.txt",
